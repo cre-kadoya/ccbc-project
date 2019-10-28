@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "ComComCoin",
+    "icon": "./images/app-icon.png",
+    "version": "1.0.0",
+    "slug": "comcomcoin",
+    "sdkVersion": "32.0.0",
+    "ios": {
+      "bundleIdentifier": "com.creativeconsultant.comcomcoin"
+    },
+    "android": {
+      "versionCode": 5,
+      "package": "com.creativeconsultant.comcomcoin",
+      "permissions": []
+    }
+  }
+}
