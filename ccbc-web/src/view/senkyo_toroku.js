@@ -453,7 +453,7 @@ class PersistentDrawer extends React.Component {
       happyotitle: [],
       bcaccount: null,
       bccoin: '0',
-      configCoin: '100',
+      configCoin: '1',
       disabledFlg: true,
       tSenkyoPk: 0,
       haifuCoinList: [],
