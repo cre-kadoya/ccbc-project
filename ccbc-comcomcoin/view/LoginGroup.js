@@ -127,7 +127,7 @@ export default class LoginGroupForm extends Component {
     return (
       <View style={styles.container}>
         <ImageBackground
-          source={require('./../images/title.jpg')}
+          source={require('./../images/title2.jpg')}
           style={styles.backgroud_image}
         >
           <View
@@ -144,9 +144,10 @@ export default class LoginGroupForm extends Component {
               <Image
                 style={{
                   height: 40,
-                  width: 250
+                  width: 350
                 }}
-                source={require('./../images/HARVEST.png')}
+                resizeMode="contain"
+                source={require('./../images/ComComCoin_logo.png')}
               />
             </View>
           </View>
@@ -172,7 +173,7 @@ export default class LoginGroupForm extends Component {
               loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
               titleStyle={{ fontWeight: '700' }}
               buttonStyle={{
-                backgroundColor: 'rgba(92, 99,216, 1)',
+                backgroundColor: '#ff5622',
                 width: 300,
                 height: 45,
                 borderColor: 'transparent',

@@ -95,7 +95,7 @@ export default class Login extends Component {
             }
             this.setLoginInfo(JSON.stringify(loginInfo))
 
-            this.props.navigation.navigate('Menu')
+            this.props.navigation.navigate('Home2')
           } else {
             this.setState({
               msg: 'ユーザ名またはパスワードを確認してください'
@@ -115,7 +115,7 @@ export default class Login extends Component {
     return (
       <View style={styles.container}>
         <ImageBackground
-          source={require('./../images/title.jpg')}
+          source={require('./../images/title2.jpg')}
           style={styles.backgroud_image}
         >
           <View
@@ -129,7 +129,14 @@ export default class Login extends Component {
             }}
           >
             <View>
-              <Image source={require('./../images/HARVEST.png')} />
+              <Image
+                style={{
+                  height: 40,
+                  width: 350
+                }}
+                resizeMode="contain"
+                source={require('./../images/ComComCoin_logo.png')}
+              />
             </View>
           </View>
           <Card>
@@ -149,6 +156,11 @@ export default class Login extends Component {
                 title="login"
                 onPress={this.onPressButton}
                 icon={{ name: 'sign-in', type: 'font-awesome' }}
+                buttonStyle={{
+                  borderColor: 'transparent',
+                  borderWidth: 0,
+                  borderRadius: 5
+                }}
               />
               <Text style={{ color: 'red' }}>{this.state.msg}</Text>
             </View>
