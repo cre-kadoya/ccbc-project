@@ -34,7 +34,7 @@ export default class MenuPh2 extends Component {
     this.props.navigation.navigate('ChatCoin')
   }
   onPressKijiButton = () => {
-    this.props.navigation.navigate('Article')
+    this.props.navigation.navigate('ArticleSelect')
   }
   onPressShoppingButton = () => {
     this.props.navigation.navigate('Shopping')

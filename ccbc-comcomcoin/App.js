@@ -18,7 +18,9 @@ import ChatSelectForm from './view/chat_select'
 import ChatMsgForm from './view/chat_msg'
 import ChatCoinForm from './view/chat_coin'
 // 記事機能
-import ArticleForm from './view/Article'
+import ArticleSelectForm from './view/ArticleSelect'
+import ArticleReferForm from './view/ArticleRefer'
+import ArticleEntryForm from './view/ArticleEntry'
 // ショッピング機能
 import ShoppingForm from './view/shopping'
 
@@ -38,7 +40,9 @@ var HomeNavigator = createStackNavigator(
     ChatSelect: { screen: ChatSelectForm },
     ChatMsg: { screen: ChatMsgForm },
     ChatCoin: { screen: ChatCoinForm },
-    Article: { screen: ArticleForm },
+    ArticleSelect: { screen: ArticleSelectForm },
+    ArticleRefer: { screen: ArticleReferForm },
+    ArticleEntry: { screen: ArticleEntryForm },
     Shopping: { screen: ShoppingForm },
   },
   {
