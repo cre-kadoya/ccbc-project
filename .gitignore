@@ -59,4 +59,7 @@ typings/
 
 # next.js build output
 .next
-ccbc-comcomcoin/.expo/packager-info.json
+
+# 固有の除外ファイル
+ccbc-comcomcoin/.expo/*
+ccbc-rest/public/uploads/*
