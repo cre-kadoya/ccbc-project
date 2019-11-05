@@ -36,7 +36,7 @@ export default class ArticleRefer extends Component {
           t_kiji_pk: 1, t_shain_pk: 1, title: "マラソン大会へのお誘い",
           t_kiji_category_pk: t_kiji_category_pk,
           contents: "今年もこの時期がやってまいりました！\n北海道の大自然の中を颯爽と走る事ができるマラソン大会です。\n自然あふれる風景を満喫しながら走りませんか？\nフルマラソンだけでなく、20kmや10kmもありますので、初心者の方も是非どうぞ。\n\n申し込み用のホームページです\nhttps://xxxxxxxxxx.jp/123456789-entry",
-          post_dt: "2019/07/15", post_tm: "10:57", file_path: "",
+          post_dt: "2019/07/15", post_tm: "10:57", file_path: "test001.png",
           shain_nm: "佐藤　陸", shain_image_path: "",
           hashtagStr: "#スポーツ　#マラソン　",
           hashtag: [
@@ -146,7 +146,7 @@ export default class ArticleRefer extends Component {
     this.setState({dispKijiList: wkDispKijiList})
     
     // 記事API.いいね処理の呼び出し（DB登録）
-    await fetch(restdomain + '/kiji/good', {
+    await fetch(restdomain + '/article/good', {
       method: 'POST',
       mode: 'cors',
       body: JSON.stringify(this.state),
@@ -172,7 +172,7 @@ export default class ArticleRefer extends Component {
     this.setState({dispKijiList: wkDispKijiList})
     
     // 記事API.お気に入り処理の呼び出し（DB登録）
-    await fetch(restdomain + '/kiji/favorite', {
+    await fetch(restdomain + '/article/favorite', {
       method: 'POST',
       mode: 'cors',
       body: JSON.stringify(this.state),
@@ -309,7 +309,7 @@ export default class ArticleRefer extends Component {
                 </View>
                 {/* 画像 */}
                 <View style={{ marginTop: 10 }}>
-                  {item.file_path != "" &&
+                  {item.file_path !== "" &&
                     <Image
                       source={{
                         uri: restdomain + `/uploads/article/${item.file_path}`

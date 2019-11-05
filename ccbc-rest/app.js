@@ -25,6 +25,7 @@ const tohyo_shokai_shosaiRouter = require('./routes/tohyo_shokai_shosai')
 const shainTorokuRouter = require('./routes/shain_toroku')
 const tohyo_shokai_nendoRouter = require('./routes/tohyo_shokai_nendo')
 const shain_kensakuRouter = require('./routes/shain_kensaku')
+const articleRouter = require('./routes/article')
 
 const loginGroupRouter = require('./routes/login_group')
 
@@ -90,6 +91,9 @@ app.use('/tohyo_shokai_nendo', tohyo_shokai_nendoRouter)
 app.use('/shain_kensaku', shain_kensakuRouter)
 
 app.use('/login_group', loginGroupRouter)
+
+// ComComCoin
+app.use('/article', articleRouter)
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

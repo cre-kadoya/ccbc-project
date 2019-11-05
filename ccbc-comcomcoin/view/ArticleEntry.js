@@ -3,6 +3,8 @@ import { StyleSheet, Text, View, Image, ScrollView, TextInput, TouchableHighligh
 import * as ImagePicker from 'expo-image-picker'
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
+import moment from 'moment'
+import 'moment/locale/ja'
 import InAppHeader from './components/InAppHeader'
 import ConfirmDialog from './components/ConfirmDialog'
 import AlertDialog from './components/AlertDialog'
@@ -17,18 +19,21 @@ export default class ArticleEntry extends Component {
       selectKijiCategory: null,
       selectKiji: null,
       editKiji: {
-          t_kiji_pk: null,
-          t_kiji_category_pk: null,
-          t_shain_pk: null,
-          title: "",
-          contents: "",
-          post_dt: "",
-          post_tm: "",
-          file_path: "",
-          hashtag: [],
-          hashtagStr: ""
+        t_kiji_pk: null,
+        t_kiji_category_pk: null,
+        t_shain_pk: null,
+        title: "",
+        contents: "",
+        post_dt: "",
+        post_tm: "",
+        file_path: "",
+        hashtag: [],
+        hashtagStr: ""
       },
-      image: null,
+      imageData: {
+        uri: "",
+        type: ""
+      },
       confirmDialogVisible: false,
       confirmDialogMessage: "",
       alertDialogVisible: false,
@@ -105,31 +110,53 @@ export default class ArticleEntry extends Component {
   entry = async () => {
     this.setState({confirmDialogVisible: false})
 
+    // APIパラメータ作成
+    const data = new FormData()
+    let editItem = this.state.editKiji
+    let fileName = ""
+    if (this.state.imageData.uri !== "") {
+      // 画像ファイル
+      fileName = moment(new Date()).format('YYYYMMDDHHmmssSS')
+      data.append('imageData', {
+        uri: this.state.imageData.uri,
+        type: this.state.imageData.type,
+        name: fileName
+      })
+      editItem.file_path = fileName
+    }
+    editItem.post_dt = new Date()
+    editItem.post_tm = new Date()
+    this.setState({
+      editKiji: editItem
+    })
+    data.append('editKiji', this.state.editKiji)
+    
     // 記事API.投稿処理の呼び出し（DB登録→BC登録）
-    await fetch(restdomain + '/kiji/Entry', {
+    await fetch(restdomain + '/article/edit', {
       method: 'POST',
       mode: 'cors',
-      body: JSON.stringify(this.state.editKiji),
-      headers: new Headers({ 'Content-type': 'application/json' })
+      body: data,
+      headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'multipart/form-data' })
     })
-      .then(function(response) {
-        return response.json()
-      })
+      .then(
+        function(response) {
+          return response.json()
+        }.bind(this)
+      )
       .then(
         function(json) {
-          // TODO : HARVESTの投票などを参考にする
-          // エラーの場合はメッセージを表示して終了
-          if (typeof json.data === 'undefined') {
-            return
+          if (!json.status) {
+            // TODO：エラー処理
+            alert("APIエラー")
+          } else {
+            // 記事照会画面に戻る
+            this.props.navigation.navigate('ArticleRefer', {
+              selectKijiCategory: this.state.selectKijiCategory
+            })
           }
         }.bind(this)
       )
       .catch(error => console.error(error))
-
-    // 記事照会画面に戻る
-    this.props.navigation.navigate('ArticleRefer', {
-      selectKijiCategory: this.state.selectKijiCategory
-    })
   }
 
   /** 画像選択処理 */
@@ -139,9 +166,19 @@ export default class ArticleEntry extends Component {
       allowsEditing: true,
       aspect: [4, 3]
     })
+    let data = {}
     if (!result.cancelled) {
-      this.setState({image: result.uri})
+      data = {
+        uri : result.uri,
+        type: result.type
+      }
+    } else {
+      data = {
+        uri : "",
+        type: ""
+      }
     }
+    this.setState({imageData: data})
   }
 
   render() {
@@ -218,13 +255,21 @@ export default class ArticleEntry extends Component {
                 />
               </View>
               {/* 画像 */}
+              {(this.state.editKiji.file_path !== "" && this.state.imageData.uri === "") && (
+                <View style={{ marginTop: 10 }}>
+                <Image
+                  source={{
+                    uri: restdomain + `/uploads/article/${this.state.editKiji.file_path}`
+                  }} />
+                </View>
+              )}
               <TouchableHighlight onPress={() => this.onClickPickImage()}>
                 <Text>画像選択</Text>
               </TouchableHighlight>
-              {this.state.image && (
+              {this.state.imageData.uri !== "" && (
                 <View>
                   <Image
-                    source={{ uri: this.state.image }}
+                    source={{ uri: this.state.imageData.uri }}
                     style={{
                       width: 250,
                       height: 250,
@@ -235,23 +280,24 @@ export default class ArticleEntry extends Component {
                 </View>
               )}
             </View>
+
+            {/* -- 投稿ボタン -- */}
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ flex: 1 }}>
+                <TouchableHighlight onPress={() => this.onClickEntry()}>
+                  <View style={styles.saveButtonView}>
+                    <View style={styles.saveButtonTitleView}>
+                      <Text style={styles.saveButtonTitleText}>投稿する</Text>
+                    </View>
+                  </View>
+                </TouchableHighlight>
+              </View>
+            </View>
+
             {/* スクロールが最下部まで表示されないことの暫定対応... */}
-            <View style={{ marginBottom: 100 }} />
+            <View style={{ marginBottom: 200 }} />
           </ScrollView>
         </KeyboardAvoidingView>
-
-        {/* -- 投稿ボタン -- */}
-        <View style={{ flexDirection: 'row' }}>
-          <View style={{ flex: 1 }}>
-            <TouchableHighlight onPress={() => this.onClickEntry()}>
-              <View style={styles.saveButtonView}>
-                <View style={styles.saveButtonTitleView}>
-                  <Text style={styles.saveButtonTitleText}>投稿する</Text>
-                </View>
-              </View>
-            </TouchableHighlight>
-          </View>
-        </View>
 
         {/* -- 確認ダイアログ -- */}
         <ConfirmDialog
