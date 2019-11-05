@@ -23,7 +23,7 @@ export default class ArticleRefer extends Component {
   }
 
   /** コンポーネントのマウント時処理 */
-  async componentWillMount() {
+  componentWillMount = async () => {
     // 記事選択画面からのパラメータ受け取り
     var selectKijiCategory = this.props.navigation.getParam("selectKijiCategory")
 
@@ -89,7 +89,7 @@ export default class ArticleRefer extends Component {
   }
 
   /** 記事投稿画面へ遷移 */
-  async moveEntry(index) {
+  moveEntry = async (index) => {
 		var selectKiji = null
 		// 編集の場合は対象リストのindexを指定、新規の場合はindexはnull
     if (index != null) {
@@ -114,35 +114,30 @@ export default class ArticleRefer extends Component {
     })
   }
 
-  // 画像選択処理
-  async choiceImage() {
-
-  }
-
   /**
    * 記事照会画面のイベント
    */
 
   /** 新規投稿ボタン押下 */
-  async onClickNewArticleBtn() {
+  onClickNewArticleBtn = async () => {
     // 記事投稿画面へ遷移
     this.moveEntry(null)
   }
 
   /** 記事編集ボタン押下 */
-  async onClickEditArticleBtn(index) {
+  onClickEditArticleBtn = async (index) => {
     // 記事投稿画面へ遷移（修正対象の記事情報を設定）
     this.moveEntry(index)
   }
 
   /** 記事検索ボタン押下 */
-  async onClickSearchArticleBtn() {
+  onClickSearchArticleBtn = async () => {
     // 記事検索ダイアログを表示
 		this.setState({searchDialogVisible: true})
   }
 
-   /** いいねボタン押下 */
-   async onClickGoodBtn(index) {
+  /** いいねボタン押下 */
+  onClickGoodBtn = async (index) => {
     // stateの内容を書き換え
     var wkDispKijiList = this.state.dispKijiList
     var selectKiji = wkDispKijiList[index]
@@ -168,7 +163,7 @@ export default class ArticleRefer extends Component {
   }
 
   /** お気に入りボタン押下 */
-  async onClickFavoriteBtn(index) {
+  onClickFavoriteBtn = async (index) => {
     // stateの内容を書き換え
     var wkDispKijiList = this.state.dispKijiList
     var selectKiji = wkDispKijiList[index]
@@ -194,7 +189,7 @@ export default class ArticleRefer extends Component {
   }
 
   /** スクロール最下部到達（次の記事の読み込み） */
-  async reachScrollBottom() {
+  reachScrollBottom = async () => {
     // 記事API.記事検索処理の呼び出し（次の記事の読み込み）
   }
 
@@ -202,8 +197,8 @@ export default class ArticleRefer extends Component {
    * 検索ダイアログ画面のイベント
    */
 
-  // 検索条件設定ボタン押下
-  async onClickDlgSearchBtn() {
+  /** 検索条件設定ボタン押下 */
+  onClickDlgSearchBtn = async () => {
     // 記事API.記事検索処理の呼び出し（条件付与）
 
 		this.setState({
@@ -211,8 +206,8 @@ export default class ArticleRefer extends Component {
 		})
   }
 
-  // 検索条件クリアボタン押下
-  async onClickDlgClearBtn() {
+  /** 検索条件クリアボタン押下 */
+  onClickDlgClearBtn = async () => {
 		// 記事API.記事検索処理の呼び出し
 
 		this.setState({
@@ -228,6 +223,7 @@ export default class ArticleRefer extends Component {
       <View>
         {/* -- 共有ヘッダ -- */}
         <InAppHeader navigate={this.props.navigation.navigate} />
+
         {/* -- 画面タイトル -- */}
         <View style={[styles.screenTitleView, { flexDirection: 'row' }]}>
           <View style={{ flex: 1, alignItems: 'flex-start', marginLeft: 10 }}>
@@ -248,8 +244,9 @@ export default class ArticleRefer extends Component {
             />
           </View>
         </View>
+
+        {/* -- 記事表示（繰り返し） -- */}
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* -- 記事表示（繰り返し） -- */}
           {this.state.dispKijiList.map((item, i) => {
             return (
               <Card key={i}>
@@ -315,7 +312,7 @@ export default class ArticleRefer extends Component {
                   {item.file_path != "" &&
                     <Image
                       source={{
-                        uri: restdomain + `/uploads/kiji/${item.file_path}`
+                        uri: restdomain + `/uploads/article/${item.file_path}`
                       }} />
                     }
                 </View>

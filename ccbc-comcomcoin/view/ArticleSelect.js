@@ -12,7 +12,7 @@ export default class ArticleSelect extends Component {
   }
 
   /** コンポーネントのマウント時処理 */
-  async componentWillMount() {
+  componentWillMount = async () => {
     // TODO : スタブデータ
     this.setState({kijiCategory: [
       { t_kiji_category_pk: 1, category_nm: "ライフハック", midoku_cnt: 0 },
@@ -24,7 +24,7 @@ export default class ArticleSelect extends Component {
   }
 
   /** 記事照会画面へ遷移 */
-  onPressCategory(selectKijiCategory) {
+  onPressCategory = async (selectKijiCategory) => {
     this.props.navigation.navigate('ArticleRefer', {
       selectKijiCategory: selectKijiCategory
     })

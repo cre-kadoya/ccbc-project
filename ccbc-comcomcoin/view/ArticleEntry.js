@@ -1,5 +1,8 @@
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, ScrollView, TextInput, TouchableHighlight, KeyboardAvoidingView } from 'react-native'
+import { StyleSheet, Text, View, Image, ScrollView, TextInput, TouchableHighlight, KeyboardAvoidingView } from 'react-native'
+import * as ImagePicker from 'expo-image-picker'
+import Constants from 'expo-constants';
+import * as Permissions from 'expo-permissions';
 import InAppHeader from './components/InAppHeader'
 import ConfirmDialog from './components/ConfirmDialog'
 import AlertDialog from './components/AlertDialog'
@@ -25,6 +28,7 @@ export default class ArticleEntry extends Component {
           hashtag: [],
           hashtagStr: ""
       },
+      image: null,
       confirmDialogVisible: false,
       confirmDialogMessage: "",
       alertDialogVisible: false,
@@ -33,7 +37,9 @@ export default class ArticleEntry extends Component {
   }
   
   /** コンポーネントのマウント時処理 */
-  async componentWillMount() {
+  componentWillMount = async () => {
+    this.getPermissionAsync()
+
     // 記事照会画面からのパラメータ受け取り
     var selectKijiCategory = this.props.navigation.getParam("selectKijiCategory")
     var selectKiji = this.props.navigation.getParam("selectKiji")
@@ -62,8 +68,17 @@ export default class ArticleEntry extends Component {
     })
   }
 
+  getPermissionAsync = async () => {
+    if (Constants.platform.ios) {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!');
+      }
+    }
+  }
+
   /** 記事投稿ボタン押下 */
-  async onClickEntry() {
+  onClickEntry = async () => {
     // 入力チェック
     if (this.state.editKiji.title == "") {
       this.setState({
@@ -87,7 +102,7 @@ export default class ArticleEntry extends Component {
     })
   }
 
-  async entry() {
+  entry = async () => {
     this.setState({confirmDialogVisible: false})
 
     // 記事API.投稿処理の呼び出し（DB登録→BC登録）
@@ -117,8 +132,16 @@ export default class ArticleEntry extends Component {
     })
   }
 
-  // 画像選択処理
-  async choiceImage() {
+  /** 画像選択処理 */
+  onClickPickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3]
+    })
+    if (!result.cancelled) {
+      this.setState({image: result.uri})
+    }
   }
 
   render() {
@@ -126,6 +149,7 @@ export default class ArticleEntry extends Component {
       <View>
         {/* -- 共有ヘッダ -- */}
         <InAppHeader navigate={this.props.navigation.navigate} />
+
         {/* -- 入力部 -- */}
         <KeyboardAvoidingView behavior="padding">
           <ScrollView showsVerticalScrollIndicator={false}>
@@ -193,10 +217,29 @@ export default class ArticleEntry extends Component {
                   }}
                 />
               </View>
-              {/* TODO : 画像 */}
+              {/* 画像 */}
+              <TouchableHighlight onPress={() => this.onClickPickImage()}>
+                <Text>画像選択</Text>
+              </TouchableHighlight>
+              {this.state.image && (
+                <View>
+                  <Image
+                    source={{ uri: this.state.image }}
+                    style={{
+                      width: 250,
+                      height: 250,
+                      marginTop: 30,
+                      marginBottom: 30
+                    }}
+                  />
+                </View>
+              )}
             </View>
+            {/* スクロールが最下部まで表示されないことの暫定対応... */}
+            <View style={{ marginBottom: 100 }} />
           </ScrollView>
         </KeyboardAvoidingView>
+
         {/* -- 投稿ボタン -- */}
         <View style={{ flexDirection: 'row' }}>
           <View style={{ flex: 1 }}>
@@ -209,6 +252,7 @@ export default class ArticleEntry extends Component {
             </TouchableHighlight>
           </View>
         </View>
+
         {/* -- 確認ダイアログ -- */}
         <ConfirmDialog
           modalVisible={this.state.confirmDialogVisible}

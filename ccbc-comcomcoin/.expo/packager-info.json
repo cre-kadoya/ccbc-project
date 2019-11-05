@@ -1,9 +1,9 @@
 {
   "expoServerPort": 19000,
-  "expoServerNgrokUrl": "https://ys-74q.anonymous.ccbc-comcomcoin.exp.direct",
-  "packagerNgrokUrl": "https://packager.ys-74q.anonymous.ccbc-comcomcoin.exp.direct",
-  "ngrokPid": 1628,
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null,
   "devToolsPort": 19002,
   "packagerPort": 19001,
-  "packagerPid": 1605
+  "packagerPid": 2430
 }
