@@ -5,35 +5,25 @@ import { withStyles } from '@material-ui/core/styles'
 import Drawer from '@material-ui/core/Drawer'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
-import List from '@material-ui/core/List'
 import MenuItem from '@material-ui/core/MenuItem'
 import Typography from '@material-ui/core/Typography'
-import TextField from '@material-ui/core/TextField'
 import Divider from '@material-ui/core/Divider'
 import IconButton from '@material-ui/core/IconButton'
 import MenuIcon from '@material-ui/icons/Menu'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import Button from '@material-ui/core/Button'
-import {
-  mailFolderListItems,
-  otherMailFolderListItems,
-  kanriListItems,
-  ippanListItems,
-  kojiListItems,
-  systemName,
-  restUrl
-} from './tileData'
-import Menu from '@material-ui/core/Menu'
-import Avatar from '@material-ui/core/Avatar'
 import { Link } from 'react-router-dom'
+import ButtonBase from '@material-ui/core/ButtonBase'
+import { kanriListItems, systemName, restUrl, titleItems } from './tileData'
+import Avatar from '@material-ui/core/Avatar'
 import Chip from '@material-ui/core/Chip'
 import { Manager, Target, Popper } from 'react-popper'
 import Grow from '@material-ui/core/Grow'
 import Paper from '@material-ui/core/Paper'
 import MenuList from '@material-ui/core/MenuList'
-import Collapse from '@material-ui/core/Collapse'
-import Portal from '@material-ui/core/Portal'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ListItemText from '@material-ui/core/ListItemText'
 
 const drawerWidth = 240
 
@@ -120,10 +110,104 @@ const styles = theme => ({
   },
   'contentShift-right': {
     marginRight: 0
+  },
+  image: {
+    position: 'relative',
+    height: 300,
+    [theme.breakpoints.down('xs')]: {
+      width: '100% !important', // Overrides inline-style
+      height: 100
+    },
+    '&:hover, &$focusVisible': {
+      zIndex: 1,
+      '& $imageBackdrop': {
+        opacity: 0.15
+      },
+      '& $imageMarked': {
+        opacity: 0
+      },
+      '& $imageTitle': {
+        border: '4px solid currentColor'
+      }
+    }
+  },
+  focusVisible: {},
+  imageButton: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: theme.palette.common.white
+  },
+  imageSrc: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    // backgroundSize: 'contain',
+    // backgroundRepeat: 'no-repeat',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center 40%'
+  },
+  imageBackdrop: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    // backgroundColor: theme.palette.common.black,
+    opacity: 0.4,
+    transition: theme.transitions.create('opacity')
+  },
+  imageTitle: {
+    position: 'relative',
+    padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 4}px ${theme
+      .spacing.unit + 6}px`,
+    fontSize: '300%'
+  },
+  imageMarked: {
+    height: 3,
+    width: 18,
+    backgroundColor: theme.palette.common.white,
+    position: 'absolute',
+    bottom: -2,
+    left: 'calc(50% - 9px)',
+    transition: theme.transitions.create('opacity')
+  },
+  chip: {
+    height: '300%',
+    margin: theme.spacing.unit
+  },
+  appBarColorDefault: {
+    backgroundColor: 'rgba(179, 179, 179, 0.92)'
   }
 })
 
-class PersistentDrawer extends React.Component {
+// 権限による表示制御のないメニューのため、constとして定義
+const images1 = [
+  {
+    url: '/images/title.jpg',
+    title: 'HARVEST',
+    width: '100%',
+    path: '/menu'
+  }
+]
+
+const images2 = [
+  {
+    url: '/images/title2.jpg',
+    title: 'ComComCoin',
+    width: '100%',
+    path: '/com_menu'
+  }
+]
+
+class AppSelectForm extends React.Component {
   state = {
     open: false,
     open2: false,
@@ -133,6 +217,7 @@ class PersistentDrawer extends React.Component {
   /** コンポーネントのマウント時処理 */
   componentWillMount() {
     var loginInfos = JSON.parse(sessionStorage.getItem('loginInfo'))
+
     for (var i in loginInfos) {
       var loginInfo = loginInfos[i]
       this.setState({ userid: loginInfo['userid'] })
@@ -141,9 +226,8 @@ class PersistentDrawer extends React.Component {
       this.setState({ imageFileName: loginInfo['imageFileName'] })
       this.setState({ shimei: loginInfo['shimei'] })
       this.setState({ kengenCd: loginInfo['kengenCd'] })
+      this.setState({ coin: loginInfo['coin'] })
     }
-    // サンプル用に認証を許可
-    sessionStorage.setItem('sessionId', true)
   }
 
   handleDrawerOpen = () => {
@@ -171,25 +255,9 @@ class PersistentDrawer extends React.Component {
     this.setState({ open2: false })
   }
 
-  update = () => {
-    var loginInfo = [
-      {
-        userid: document.js.userid.value,
-        password: document.js.password.value,
-        tShainPk: document.js.tShainPk.value,
-        imageFileName: document.js.imageFileName.value,
-        shimei: document.js.shimei.value,
-        kengenCd: document.js.kengenCd.value
-      }
-    ]
-    sessionStorage.setItem('loginInfo', JSON.stringify(loginInfo))
-    alert('セッションストレージに反映しました')
-  }
-
   render() {
     const { classes, theme } = this.props
     const { anchor, open, open2 } = this.state
-    const { anchorEl } = this.state
     const loginLink = props => <Link to="../" {...props} />
 
     const drawer = (
@@ -211,7 +279,16 @@ class PersistentDrawer extends React.Component {
           </IconButton>
         </div>
         <Divider />
-        <List>{kanriListItems()}</List>
+        <div>
+          <ListItem button component={Link} to="/menu">
+            <Avatar alt="shain_kanri" src="/images/hutaba_blue.png" />
+            <ListItemText primary="HARVEST" />
+          </ListItem>
+          <ListItem button component={Link} to="/com_menu">
+            <Avatar alt="shain_kanri" src="/images/comcomsmile_orange2.png" />
+            <ListItemText primary="ComComCoin" />
+          </ListItem>
+        </div>
       </Drawer>
     )
 
@@ -232,6 +309,7 @@ class PersistentDrawer extends React.Component {
               [classes.appBarShift]: open,
               [classes[`appBarShift-${anchor}`]]: open
             })}
+            classes={{ colorPrimary: this.props.classes.appBarColorDefault }}
           >
             <Toolbar disableGutters={!open}>
               <IconButton
@@ -242,10 +320,23 @@ class PersistentDrawer extends React.Component {
               >
                 <MenuIcon />
               </IconButton>
-              <div className={classes.appFrame}>
-                <Typography variant="title" color="inherit" noWrap>
-                  {systemName}
-                </Typography>
+              <div
+                style={{
+                  zIndex: 1,
+                  overflow: 'hidden',
+                  position: 'relative',
+                  display: 'flex',
+                  width: '100%',
+                  /* 左右中央寄せ */
+                  webkitBoxPack: 'center',
+                  msFlexPack: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <img
+                  src="/images/CREATIVE CONSULTANT_logo_A_reverse.png"
+                  style={{ height: 50 }}
+                />
               </div>
               <Manager>
                 <Target>
@@ -310,131 +401,74 @@ class PersistentDrawer extends React.Component {
             )}
           >
             <div className={classes.drawerHeader} />
-            <Typography>
-              <div>
-                <h3>部品サンプル</h3>
-                <ul>
-                  <li>
-                    <a href="/radar">【01】レーダーチャート</a>
-                  </li>
-                  <li>
-                    <a href="/graph">【02】グラフ</a>
-                  </li>
-                  <li>
-                    <a href="/db">【03】データベース</a>
-                  </li>
-                  <li>
-                    <a href="/image">【04】イメージ</a>
-                  </li>
-                  <li>
-                    <a href="/redux">
-                      【05】Reduxサンプル（画面間の値受け渡し）
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/check">【06】入力チェック</a>
-                  </li>
-                </ul>
-                <h3>テスト用セッションストレージ登録</h3>
-                <label>
-                  ここで入力したものがセッションストレージに格納されますのでテスト用に使ってください。<br />
-                  ブラウザを閉じる、またはログアウトしたタイミングでセッションストレージは破棄されます。<br />
-                  イメージファイル名（imageFileName）については、上記「部品サンプル【04】イメージ」で登録したファイル名を指定してください。
-                </label>
-                <br />
-                <form name="js">
-                  <label>userid：</label>
-                  <input type="text" name="userid" />&nbsp;
-                  <label>password：</label>
-                  <input type="text" name="password" />&nbsp;
-                  <label>tShainPk：</label>
-                  <input type="text" name="tShainPk" />&nbsp;
-                  <br />
-                  <label>imageFileName：</label>
-                  <input type="text" name="imageFileName" />&nbsp;
-                  <label>shimei：</label>
-                  <input type="text" name="shimei" />&nbsp;
-                  <label>kengenCd：</label>
-                  <input type="text" name="kengenCd" />&nbsp;
-                  <br />
-                  <input type="button" value="反映" onClick={this.update} />
-                </form>
-                <h3>HARVEST画面モックアップ（使用不可）</h3>
-                <h3>画面モックアップサンプル（イテレーション１）</h3>
-                <ul>
-                  <li>
-                    <a href="/menu">【01】メインメニュー</a>
-                  </li>
-                  <li>
-                    <a href="/senkyo_kanri">【02】選挙管理</a>
-                  </li>
-                  <li>
-                    <a href="/senkyo_toroku">【03】選挙登録</a>
-                  </li>
-                  <li>
-                    <a href="/tohyo_toroku">【04】投票登録</a>
-                  </li>
-                </ul>
-                <h3>画面モックアップサンプル（イテレーション２）</h3>
-                <ul>
-                  <li>
-                    <a href="/tohyo_ichiran">【01】投票一覧</a>
-                  </li>
-                  <li>
-                    <a href="/tohyo_shokai_kobetsu">【02】投票照会（個別）</a>
-                  </li>
-                  <li>
-                    <a href="/tohyo_shokai_shosai">
-                      【03】投票照会（個別詳細）
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/coin_shokai">【04】コイン照会</a>
-                  </li>
-                  <li>
-                    <a href="/comment_shokai">【05】コメント照会</a>
-                  </li>
-                </ul>
-                <h3>画面モックアップサンプル（イテレーション３）</h3>
-                <ul>
-                  <li>
-                    <a href="/coin_zoyo">【01】コイン贈与</a>
-                  </li>
-                </ul>
-                <h3>画面モックアップサンプル（イテレーション４）</h3>
-                <ul>
-                  <li>
-                    <a href="/shain_kensaku">【01】社員検索</a>
-                  </li>
-                  <li>
-                    <a href="/shain_toroku">【02】社員登録</a>
-                  </li>
-                  <li>
-                    <a href="/tohyo_shokai_nendo">【03】投票照会（年度）</a>
-                  </li>
-                </ul>
-
-                <h3>ComComCoin画面モックアップ</h3>
-                <ul>
-                  <li>
-                    <a href="/com_coin_shokai">【01】コイン照会</a>
-                  </li>
-                  <li>
-                    <a href="/com_coin_shokai_graph">【02】コイン照会グラフ</a>
-                  </li>
-                  <li>
-                    <a href="/com_shohin_mente">【03】商品メンテナンス</a>
-                  </li>
-                  <li>
-                    <a href="/com_kokoku_mente">【04】広告メンテナンス</a>
-                  </li>
-                  <li>
-                    <a href="/com_oshirase_mente">【05】お知らせメンテナンス</a>
-                  </li>
-                  <li>
-                    <a href="/com_coin_shojicoin">【06】コイン照会所持コイン</a>
-                  </li>
-                </ul>
+            <Typography noWrap>
+              <div className={classes.root}>
+                {images1.map(image => (
+                  <ButtonBase
+                    focusRipple
+                    key={image.title}
+                    className={classes.image}
+                    focusVisibleClassName={classes.focusVisible}
+                    style={{
+                      width: image.width
+                    }}
+                    component={Link}
+                    to={image.path}
+                  >
+                    <span
+                      className={classes.imageSrc}
+                      style={{
+                        backgroundImage: `url(${image.url})`
+                      }}
+                    />
+                    <span className={classes.imageBackdrop} />
+                    <span className={classes.imageButton}>
+                      <Typography
+                        component="span"
+                        variant="subheading"
+                        color="inherit"
+                        className={classes.imageTitle}
+                      >
+                        {image.title}
+                      </Typography>
+                    </span>
+                  </ButtonBase>
+                ))}
+              </div>
+            </Typography>
+            <Typography noWrap>
+              <div className={classes.root}>
+                {images2.map(image => (
+                  <ButtonBase
+                    focusRipple
+                    key={image.title}
+                    className={classes.image}
+                    focusVisibleClassName={classes.focusVisible}
+                    style={{
+                      width: image.width
+                    }}
+                    component={Link}
+                    to={image.path}
+                  >
+                    <span
+                      className={classes.imageSrc}
+                      style={{
+                        backgroundImage: `url(${image.url})`
+                      }}
+                    />
+                    <span className={classes.imageBackdrop} />
+                    <span className={classes.imageButton}>
+                      <Typography
+                        component="span"
+                        variant="subheading"
+                        color="inherit"
+                        className={classes.imageTitle}
+                      >
+                        {image.title}
+                      </Typography>
+                    </span>
+                  </ButtonBase>
+                ))}
               </div>
             </Typography>
           </main>
@@ -445,9 +479,9 @@ class PersistentDrawer extends React.Component {
   }
 }
 
-PersistentDrawer.propTypes = {
+AppSelectForm.propTypes = {
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired
 }
 
-export default withStyles(styles, { withTheme: true })(PersistentDrawer)
+export default withStyles(styles, { withTheme: true })(AppSelectForm)

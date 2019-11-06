@@ -54,7 +54,8 @@ class TextFields extends React.Component {
       bc_account: '',
       image_file_nm: '',
       shimei: '',
-      kengen_cd: ''
+      kengen_cd: '',
+      coin: ''
     }
   }
 
@@ -101,6 +102,7 @@ class TextFields extends React.Component {
             this.setState({ shimei: resList.shimei })
             this.setState({ kengen_cd: resList.kengen_cd })
             this.setState({ password: this.state.passwordInput })
+            this.setState({ coin: '300コイン' }) // TODO
 
             // TODO ここでサーバ（BC）へリクエストを送ってログイン情報を取得し、セッションストレージに格納して持ち回る
             var loginInfo = [
@@ -112,14 +114,15 @@ class TextFields extends React.Component {
                 imageFileName: resList.image_file_nm, // ここはDBから読み込んだ値を設定
                 shimei: resList.shimei, // ここはDBから読み込んだ値を設定
                 kengenCd: resList.kengen_cd, // ここはDBから読み込んだ値を設定
-                tokenId: json.token
+                tokenId: json.token,
+                coin: '300コイン' // TODO
               }
             ]
 
             await sessionStorage.setItem('loginInfo', JSON.stringify(loginInfo))
             await sessionStorage.setItem('sessionId', true)
 
-            await this.props.history.push('/menu')
+            await this.props.history.push('/app_select')
           } else {
             this.setState({
               msg: 'ユーザ名またはパスワードを確認してください'
@@ -133,7 +136,7 @@ class TextFields extends React.Component {
 
   render() {
     const { classes } = this.props
-    const MyLink = props => <Link to="/menu" {...props} />
+    const MyLink = props => <Link to="/app_select" {...props} />
 
     return (
       <form className={classes.container} noValidate autoComplete="off">
@@ -144,7 +147,7 @@ class TextFields extends React.Component {
             minHeight: '100vh',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            backgroundImage: 'url(/images/title.jpg)',
+            backgroundImage: 'url(/images/pixta_31465288_M4.jpg)',
 
             display: '-webkit-box',
             display: '-ms-flexbox',
@@ -164,7 +167,10 @@ class TextFields extends React.Component {
           <table>
             <tr>
               <td colspan="3" align="center">
-                <img src="/images/HARVEST5.png" />
+                <img
+                  src="/images/CREATIVE CONSULTANT_logo_D_color.png"
+                  style={{ width: 200 }}
+                />
                 {/* <Avatar
                   src="/images/cvircy.png"
                   style={{ margin: 80, marginBottom: -42 }}
@@ -274,11 +280,11 @@ class TextFields extends React.Component {
                 <td colspan="2">
                   <br />
                   <br />
-                  {/* <Typography component="p" align="right">
+                  <Typography component="p" align="right">
                     <a href="/sample">
                       ※画面モックサンプルメニューへ遷移（実装用）
                     </a>
-                  </Typography> */}
+                  </Typography>
                   <Typography component="p" align="right">
                     ※ID、パスワード紛失時は管理者に連絡してください
                   </Typography>
