@@ -30,3 +30,13 @@ exports.sequelize3 = function(db_name) {
     }
   )
 }
+
+exports.sequelizeDB = function(req) {
+  var db
+  if (req.body.db_name != null && req.body.db_name != '') {
+    db = sequelize3(req.body.db_name)
+  } else {
+    db = sequelize
+  }
+  return db
+}
