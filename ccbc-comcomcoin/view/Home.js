@@ -1,47 +1,84 @@
 import React, { PureComponent } from 'react'
-import {
-  Dimensions,
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  ScrollView
-} from 'react-native'
-
+import { Dimensions, StyleSheet, View, Text, Image, ScrollView, TouchableOpacity } from 'react-native'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
-import { Card, Avatar } from 'react-native-elements'
+import { Card } from 'react-native-elements'
+import moment from 'moment'
+import 'moment/locale/ja'
 
-export default class ExampleCarousel extends PureComponent {
-  state = {
-    data: [
-      require('./../images/CONSADOLE.png'),
-      require('./../images/kokoku_1.jpg'),
-      require('./../images/kokoku_2.jpg'),
-      require('./../images/kokoku_3.jpg'),
-      require('./../images/kokoku_4.jpg')
-    ]
+const restdomain = require('./common/constans.js').restdomain
+const windowWidth = Dimensions.get('window').width
+
+export default class Home extends PureComponent {
+  constructor(props) {
+    super(props)
+    this.state = {
+      activeSlide: 0,
+      adList: [],
+      adList2: [],
+      infoList: [],
+      newArticleList: [],
+      popularArticleList: []
+    }
   }
 
-  renderItem = ({ index }) => (
+  /** コンポーネントのマウント時処理 */
+  componentWillMount = async () => {
+    // TODO : テストデータ
+    this.setState({
+      activeSlide: 0,
+      adList: [
+        { renban: 1, file_path: 'kokoku_1.jpg' },
+        { renban: 2, file_path: 'kokoku_2.jpg' },
+        { renban: 3, file_path: 'kokoku_3.jpg' },
+        { renban: 4, file_path: 'kokoku_4.jpg' },
+        { renban: 5, file_path: 'CONSADOLE.png' },
+      ],
+      adList2: [
+        'kokoku_1.jpg',
+        'kokoku_2.jpg',
+        'kokoku_3.jpg',
+        'kokoku_4.jpg',
+        'CONSADOLE.png',
+      ],
+      infoList: [
+        { notice_dt: "2019/04/12", title: "北海道新聞にHARVESTの記事が掲載されました。" },
+        { notice_dt: "2019/03/15", title: "HARVESTに関するプレスリリースしました。" },
+        { notice_dt: "2019/03/15", title: "HARVESTに関するプレスリリースしました。" },
+      ],
+      newArticleList: [
+        { title: "マラソン大会へのお誘い", hashtagStr: "#スポーツ　#マラソン　", file_path: "test001.png", shain_image_path: "", goodCnt: 12 },
+        { title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
+        { title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
+      ],
+      popularArticleList: [
+        { title: "マラソン大会へのお誘い", hashtagStr: "#スポーツ　#マラソン　", file_path: "test001.png", shain_image_path: "", goodCnt: 12 },
+        { title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
+        { title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
+      ]
+    })
+  }
+
+  renderItem = ({ item, index }) => (
     <View style={styles.tile}>
-      <Image
-        style={{
-          height: 185,
-          width: 350
-        }}
-        resizeMode="contain"
-        source={this.state.data[index]}
-      />
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={() => this.props.navigation.navigate('HomeAdvertise', {
+          renban: item.renban
+        })}
+      >
+        <Image style={{ height: 185, width: windowWidth }}
+          resizeMode="contain"
+          source={{ uri: restdomain + `/uploads/advertise/${item.file_path}` }}
+        />
+      </TouchableOpacity>
     </View>
   )
 
   get pagination() {
-    const { entries, activeSlide = 0 } = this.state
     return (
       <Pagination
-        dotsLength={this.state.data.length}
-        activeDotIndex={activeSlide}
-        //containerStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}
+        dotsLength={this.state.adList.length}
+        activeDotIndex={this.state.activeSlide}
         dotStyle={{
           width: 10,
           height: 10,
@@ -50,9 +87,7 @@ export default class ExampleCarousel extends PureComponent {
           backgroundColor: 'rgba(200, 200, 200, 0.92)'
         }}
         inactiveDotStyle={
-          {
-            // Define styles for inactive dots here
-          }
+          {}
         }
         inactiveDotOpacity={0.4}
         inactiveDotScale={0.6}
@@ -66,389 +101,187 @@ export default class ExampleCarousel extends PureComponent {
         <View style={[{ flex: 0.1 }]}>
           <Text />
         </View>
+        {/* -- 広告 -- */}
         <View style={{ flex: 1.0, flexDirection: 'row' }}>
           <View style={styles.container}>
             <Carousel
-              data={this.state.data}
-              renderItem={index => this.renderItem(index)}
+              data={this.state.adList}
+              layout={'default'}
+              renderItem={this.renderItem.bind(this)}
               onSnapToItem={index => this.setState({ activeSlide: index })}
-              itemWidth={Dimensions.get('window').width * 0.85}
-              sliderWidth={Dimensions.get('window').width}
+              itemWidth={windowWidth}
+              sliderWidth={windowWidth}
               containerCustomStyle={styles.carousel}
               slideStyle={{ flex: 1 }}
+              loop
               autoplay
-              firstItem={0}
-              // loop
             />
             <View>{this.pagination}</View>
           </View>
         </View>
-        <View
-          style={[
-            {
-              flex: 0.1,
-              backgroundColor: 'rgba(255, 136, 0, 0.92)',
-              flexDirection: 'row',
-              alignItems: 'center'
-              //justifyContent: 'center'
-            }
-          ]}
-        >
-          <Image
-            // style={{
-            //   height: 185,
-            //   width: 350
-            // }}
-            resizeMode="contain"
-            source={require('./../images/icons8-post-box-24.png')}
-          />
+        {/* -- お知らせ -- */}
+        <View style={{ flex: 0.1, backgroundColor: 'rgba(255, 136, 0, 0.92)', flexDirection: 'row', alignItems: 'center' }}>
+          <Image resizeMode="contain" source={require('./../images/icons8-post-box-24.png')} />
           <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-            {' '}
-            お知らせ
+            {' '}お知らせ
           </Text>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: 16,
-              position: 'absolute',
-              right: 0
-            }}
-          >
+          <Text style={{ color: 'white', fontSize: 16, position: 'absolute', right: 0 }}
+            onPress={() => this.props.navigation.navigate('HomeInfoList')} >
             もっと見る>
           </Text>
         </View>
         <View style={[{ flex: 0.3 }]}>
-          <Text>2019.04.12 北海道新聞にHARVESTの記事が掲載されました。</Text>
-          <Text style={{ marginTop: 5 }}>
-            2019.03.15 HARVESTに関するプレスリリースしました。
-          </Text>
-          <Text style={{ marginTop: 5 }}>
-            2018.09.15 財界さっぽろ様の企業特集に掲載されました。
-          </Text>
+          {/* お知らせの件数分、繰り返し（最大3件） */}
+          {this.state.infoList.map((item, i) => {
+            return (
+              <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginTop: 5 }} key={i}>
+                {moment(new Date(item.notice_dt)).format('YYYY/MM/DD')}{' '}{item.title}
+              </Text>
+            )
+          })}
         </View>
-        <View
-          style={[
-            {
-              flex: 0.1,
-              backgroundColor: 'rgba(255, 136, 0, 0.92)',
-              flexDirection: 'row',
-              alignItems: 'center'
-              //justifyContent: 'center'
-            }
-          ]}
-        >
-          <Image
-            // style={{
-            //   height: 185,
-            //   width: 350
-            // }}
-            resizeMode="contain"
-            source={require('./../images/icons8-news-24.png')}
-          />
+        {/* -- 最新の記事 -- */}
+        <View style={{ flex: 0.1, backgroundColor: 'rgba(255, 136, 0, 0.92)', flexDirection: 'row', alignItems: 'center' }}>
+          <Image resizeMode="contain" source={require('./../images/icons8-news-24.png')} />
           <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-            {' '}
-            最新の記事
+            {' '}最新の記事
           </Text>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: 16,
-              position: 'absolute',
-              right: 0
-            }}
-          >
+          <Text style={{ color: 'white', fontSize: 16, position: 'absolute', right: 0 }}
+            onPress={() => this.props.navigation.navigate('HomeArticleList', {
+              mode: "new"
+            })}>
             もっと見る>
           </Text>
         </View>
         <View style={[{ flex: 0.6, flexDirection: 'row' }]}>
+          {/* 最新の記事の件数分、繰り返し（横スクロール） */}
           <ScrollView horizontal={true}>
-            <Card containerStyle={{ height: 120, width: 150 }}>
-              <View
-                style={[
-                  {
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                    marginTop: -15
-                  }
-                ]}
-              >
-                <Image
-                  source={require('./../images/man3.jpg')}
-                  style={{ width: 60, height: 60 }}
-                />
-              </View>
-              <Text style={{ marginBottom: 10 }}>第三回マラソン大…</Text>
-              <Text style={{ color: '#808080', marginTop: -10 }}>
-                #スポーツ
-              </Text>
-              <View style={[{ flexDirection: 'row' }]}>
-                <Image
-                  resizeMode="contain"
-                  source={require('./../images/icons8-thumbs-up-24_2.png')}
-                />
-                <Text
-                  style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}
-                >
-                  {' '}
-                  1
-                </Text>
-              </View>
-            </Card>
-            <Card containerStyle={{ height: 120, width: 150 }}>
-              <View
-                style={[
-                  {
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                    marginTop: -15
-                  }
-                ]}
-              >
-                <Image
-                  source={require('./../images/woman3.jpg')}
-                  style={{ width: 60, height: 60 }}
-                />
-              </View>
-              <Text style={{ marginBottom: 10 }}>6/3の夜ご飯</Text>
-              <Text style={{ color: '#808080', marginTop: -10 }}>
-                #食べ物 #女子力
-              </Text>
-              <View style={[{ flexDirection: 'row' }]}>
-                <Image
-                  resizeMode="contain"
-                  source={require('./../images/icons8-thumbs-up-24_2.png')}
-                />
-                <Text
-                  style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}
-                >
-                  {' '}
-                  3
-                </Text>
-              </View>
-            </Card>
-            <Card containerStyle={{ height: 120, width: 150 }}>
-              <View
-                style={[
-                  {
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                    marginTop: -15
-                  }
-                ]}
-              >
-                <Image
-                  source={require('./../images/man2.jpg')}
-                  style={{ width: 60, height: 60 }}
-                />
-              </View>
-              <Text style={{ marginBottom: 10 }}>プログラミング講…</Text>
-              <Text style={{ color: '#808080', marginTop: -10 }}>
-                #プログラミング
-              </Text>
-              <View style={[{ flexDirection: 'row' }]}>
-                <Image
-                  resizeMode="contain"
-                  source={require('./../images/icons8-thumbs-up-24_2.png')}
-                />
-                <Text
-                  style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}
-                >
-                  {' '}
-                  2
-                </Text>
-              </View>
-            </Card>
+            {this.state.newArticleList.map((item, i) => {
+              return (
+                <Card containerStyle={{ height: 120, width: 150 }} key={i}>
+                  {/* TODO : onPressで画面遷移 */}
+                  {/* 画像 */}
+                  <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
+                    {item.file_path !== "" &&
+                      <Image
+                        source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
+                        style={{ width: 60, height: 60 }}
+                      />
+                    }
+                    {/* 画像が未登録の場合は社員の顔写真を表示 */}
+                    {item.file_path === "" &&
+                      <Image
+                        source={{ uri: restdomain + `/uploads/${item.shain_image_path}` }}
+                        style={{ width: 60, height: 60 }}
+                      />
+                    }
+                  </View>
+                  {/* タイトル */}
+                  <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginBottom: 10 }}>
+                    {item.title}
+                  </Text>
+                  {/* ハッシュタグ */}
+                  <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ color: '#808080', marginTop: -10 }}>
+                    {item.hashtagStr}
+                  </Text>
+                  {/* いいね */}
+                  <View style={[{ flexDirection: 'row' }]}>
+                    <Image
+                      resizeMode="contain"
+                      source={require('./../images/icons8-thumbs-up-24_2.png')}
+                    />
+                    <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}>
+                      {' '}{item.goodCnt}
+                    </Text>
+                  </View>
+                </Card>
+              )
+            })}
           </ScrollView>
         </View>
-        <View
-          style={[
-            {
-              flex: 0.1,
-              backgroundColor: 'rgba(255, 136, 0, 0.92)',
-              flexDirection: 'row',
-              alignItems: 'center'
-              //justifyContent: 'center'
-            }
-          ]}
-        >
-          <Image
-            // style={{
-            //   height: 185,
-            //   width: 350
-            // }}
-            resizeMode="contain"
-            source={require('./../images/icons8-thumbs-up-24.png')}
-          />
+        {/* -- 人気の記事 -- */}
+        <View style={{ flex: 0.1, backgroundColor: 'rgba(255, 136, 0, 0.92)', flexDirection: 'row', alignItems: 'center' }}>
+          <Image resizeMode="contain" source={require('./../images/icons8-thumbs-up-24.png')} />
           <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-            {' '}
-            人気の記事
+            {' '}人気の記事
           </Text>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: 16,
-              position: 'absolute',
-              right: 0
-            }}
-          >
+          <Text style={{ color: 'white', fontSize: 16, position: 'absolute', right: 0 }}
+            onPress={() => this.props.navigation.navigate('HomeArticleList', {
+              mode: "popular"
+            })}>
             もっと見る>
           </Text>
         </View>
         <View style={[{ flex: 0.6 }]}>
+          {/* 人気の記事の件数分、繰り返し（横スクロール） */}
           <ScrollView horizontal={true}>
-            <Card containerStyle={{ height: 120, width: 150 }}>
-              <View
-                style={[
-                  {
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                    marginTop: -15
-                  }
-                ]}
-              >
-                <Image
-                  source={require('./../images/woman3.jpg')}
-                  style={{ width: 60, height: 60 }}
-                />
-              </View>
-              <Text style={{ marginBottom: 10 }}>笑顔の効果</Text>
-              <Text style={{ color: '#808080', marginTop: -10 }}>#EQ</Text>
-              <View style={[{ flexDirection: 'row' }]}>
-                <Image
-                  resizeMode="contain"
-                  source={require('./../images/icons8-thumbs-up-24_2.png')}
-                />
-                <Text
-                  style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}
-                >
-                  {' '}
-                  12
-                </Text>
-              </View>
-            </Card>
-            <Card containerStyle={{ height: 120, width: 150 }}>
-              <View
-                style={[
-                  {
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                    marginTop: -15
-                  }
-                ]}
-              >
-                <Image
-                  source={require('./../images/man1.jpg')}
-                  style={{ width: 60, height: 60 }}
-                />
-              </View>
-              <Text style={{ marginBottom: 10 }}>今日のポエム</Text>
-              <Text style={{ color: '#808080', marginTop: -10 }}>#妄想</Text>
-              <View style={[{ flexDirection: 'row' }]}>
-                <Image
-                  resizeMode="contain"
-                  source={require('./../images/icons8-thumbs-up-24_2.png')}
-                />
-                <Text
-                  style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}
-                >
-                  {' '}
-                  10
-                </Text>
-              </View>
-            </Card>
-            <Card containerStyle={{ height: 120, width: 150 }}>
-              <View
-                style={[
-                  {
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                    marginTop: -15
-                  }
-                ]}
-              >
-                <Image
-                  source={require('./../images/man2.jpg')}
-                  style={{ width: 60, height: 60 }}
-                />
-              </View>
-              <Text style={{ marginBottom: 10 }}>初心者プログラミ…</Text>
-              <Text style={{ color: '#808080', marginTop: -10 }}>
-                #プログラミング
-              </Text>
-              <View style={[{ flexDirection: 'row' }]}>
-                <Image
-                  resizeMode="contain"
-                  source={require('./../images/icons8-thumbs-up-24_2.png')}
-                />
-                <Text
-                  style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}
-                >
-                  {' '}
-                  7
-                </Text>
-              </View>
-            </Card>
+            {this.state.popularArticleList.map((item, i) => {
+              return (
+                <Card containerStyle={{ height: 120, width: 150 }} key={i}>
+                  {/* TODO : onPressで画面遷移 */}
+                  {/* 画像 */}
+                  <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
+                    {item.file_path !== "" &&
+                      <Image
+                        source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
+                        style={{ width: 60, height: 60 }}
+                      />
+                    }
+                    {/* 画像が未登録の場合は社員の顔写真を表示 */}
+                    {item.file_path === "" &&
+                      <Image
+                        source={{ uri: restdomain + `/uploads/${item.shain_image_path}` }}
+                        style={{ width: 60, height: 60 }}
+                      />
+                    }
+                  </View>
+                  {/* タイトル */}
+                  <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginBottom: 10 }}>
+                    {item.title}
+                  </Text>
+                  {/* ハッシュタグ */}
+                  <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ color: '#808080', marginTop: -10 }}>
+                    {item.hashtagStr}
+                  </Text>
+                  {/* いいね */}
+                  <View style={[{ flexDirection: 'row' }]}>
+                    <Image
+                      resizeMode="contain"
+                      source={require('./../images/icons8-thumbs-up-24_2.png')}
+                    />
+                    <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}>
+                      {' '}{item.goodCnt}
+                    </Text>
+                  </View>
+                </Card>
+              )
+            })}
           </ScrollView>
         </View>
+        {/* -- 各機能アイコン -- */}
         <View style={[{ flex: 0.3, flexDirection: 'row' }]}>
-          <View
-            style={[
-              {
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flex: 1
-              }
-            ]}
-          >
+          <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <Image
               resizeMode="contain"
               source={require('./../images/icons8-chat-bubble-48.png')}
             />
             <Text>チャット</Text>
           </View>
-          <View
-            style={[
-              {
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flex: 1
-              }
-            ]}
-          >
+          <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <Image
               resizeMode="contain"
               source={require('./../images/icons8-qr-code-48.png')}
             />
             <Text>買い物</Text>
           </View>
-          <View
-            style={[
-              {
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flex: 1
-              }
-            ]}
-          >
+          <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <Image
               resizeMode="contain"
               source={require('./../images/icons8-brainstorm-skill-48.png')}
             />
             <Text>情報ひろば</Text>
           </View>
-          <View
-            style={[
-              {
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flex: 1
-              }
-            ]}
-          >
+          <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <Image
               resizeMode="contain"
               source={require('./../images/icons8-services-48.png')}
@@ -462,20 +295,11 @@ export default class ExampleCarousel extends PureComponent {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    height: 250
-  },
   carousel: {
     flex: 1
-    // backgroundColor: 'red'
   },
   tile: {
     flex: 1,
     width: Dimensions.get('window').width * 0.85
-    // backgroundColor: 'yellow'
-  },
-  tile2: {
-    flex: 0.1,
-    backgroundColor: 'rgba(255, 136, 0, 0.92)'
   }
 })

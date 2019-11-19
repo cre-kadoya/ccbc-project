@@ -40,7 +40,7 @@ export default class ArticleEntry extends Component {
       alertDialogMessage: "",
     }
   }
-  
+
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
     this.getPermissionAsync()
@@ -108,7 +108,7 @@ export default class ArticleEntry extends Component {
   }
 
   entry = async () => {
-    this.setState({confirmDialogVisible: false})
+    this.setState({ confirmDialogVisible: false })
 
     // APIパラメータ作成
     const data = new FormData()
@@ -130,7 +130,7 @@ export default class ArticleEntry extends Component {
       editKiji: editItem
     })
     data.append('editKiji', this.state.editKiji)
-    
+
     // 記事API.投稿処理の呼び出し（DB登録→BC登録）
     await fetch(restdomain + '/article/edit', {
       method: 'POST',
@@ -139,12 +139,12 @@ export default class ArticleEntry extends Component {
       headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'multipart/form-data' })
     })
       .then(
-        function(response) {
+        function (response) {
           return response.json()
         }.bind(this)
       )
       .then(
-        function(json) {
+        function (json) {
           if (!json.status) {
             // TODO：エラー処理
             alert("APIエラー")
@@ -169,16 +169,16 @@ export default class ArticleEntry extends Component {
     let data = {}
     if (!result.cancelled) {
       data = {
-        uri : result.uri,
+        uri: result.uri,
         type: result.type
       }
     } else {
       data = {
-        uri : "",
+        uri: "",
         type: ""
       }
     }
-    this.setState({imageData: data})
+    this.setState({ imageData: data })
   }
 
   render() {
@@ -257,10 +257,9 @@ export default class ArticleEntry extends Component {
               {/* 画像 */}
               {(this.state.editKiji.file_path !== "" && this.state.imageData.uri === "") && (
                 <View style={{ marginTop: 10 }}>
-                <Image
-                  source={{
-                    uri: restdomain + `/uploads/article/${this.state.editKiji.file_path}`
-                  }} />
+                  <Image
+                    source={{ uri: restdomain + `/uploads/article/${this.state.editKiji.file_path}` }}
+                    style={{ width: 300, height: 300 }} />
                 </View>
               )}
               <TouchableHighlight onPress={() => this.onClickPickImage()}>
@@ -304,14 +303,14 @@ export default class ArticleEntry extends Component {
           modalVisible={this.state.confirmDialogVisible}
           message={this.state.confirmDialogMessage}
           handleYes={this.entry.bind(this)}
-          handleNo={()=>{this.setState({confirmDialogVisible: false})}}
-          handleClose={()=>{this.setState({confirmDialogVisible: false})}}
+          handleNo={() => { this.setState({ confirmDialogVisible: false }) }}
+          handleClose={() => { this.setState({ confirmDialogVisible: false }) }}
         />
         {/* -- メッセージダイアログ -- */}
         <AlertDialog
           modalVisible={this.state.alertDialogVisible}
           message={this.state.alertDialogMessage}
-          handleClose={()=>{this.setState({alertDialogVisible: false})}}
+          handleClose={() => { this.setState({ alertDialogVisible: false }) }}
         />
       </View>
     )

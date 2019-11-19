@@ -36,7 +36,7 @@ class InAppHeader extends Component {
 								alignItems: 'center'
 							}}
 						>
-							<Image source={require('./../../images/HARVEST3.png')} />
+							<Image source={require('./../../images/ComComCoin_logo_02.png')} />
 						</View>
 					}
 					rightComponent={

@@ -13,7 +13,7 @@ export default class MenuPh2 extends Component {
     this.state = {}
   }
 
-  async componentWillMount() {}
+  async componentWillMount() { }
 
   onPressLogoutButton = () => {
     this.props.navigation.navigate('MenuPh2')
@@ -49,19 +49,19 @@ export default class MenuPh2 extends Component {
     this.props.navigation.navigate('Home')
   }
   onPressKokokuButton = () => {
-    this.props.navigation.navigate('Kokoku')
+    this.props.navigation.navigate('HomeAdvertise')
   }
   onPressOshiraseButton = () => {
-    this.props.navigation.navigate('Oshirase')
+    this.props.navigation.navigate('HomeInfoList')
   }
   onPressOshiraseShosaiButton = () => {
-    this.props.navigation.navigate('OshiraseShosai')
+    this.props.navigation.navigate('HomeInformation')
   }
   onPressSaishinKijiButton = () => {
-    this.props.navigation.navigate('SaishinKiji')
+    this.props.navigation.navigate('HomeArticleList', { mode: "new" })
   }
   onPressNinkiKijiButton = () => {
-    this.props.navigation.navigate('NinkiKiji')
+    this.props.navigation.navigate('HomeArticleList', { mode: "popular" })
   }
   render() {
     return (
