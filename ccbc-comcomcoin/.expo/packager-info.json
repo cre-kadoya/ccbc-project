@@ -1,9 +1,9 @@
 {
-  "expoServerPort": 19000,
-  "expoServerNgrokUrl": "https://cz-sak.anonymous.ccbc-comcomcoin.exp.direct",
-  "packagerNgrokUrl": "https://packager.cz-sak.anonymous.ccbc-comcomcoin.exp.direct",
-  "ngrokPid": 10930,
+  "expoServerPort": null,
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null,
   "devToolsPort": 19002,
-  "packagerPort": 19003,
-  "packagerPid": 10917
+  "packagerPort": null,
+  "packagerPid": null
 }

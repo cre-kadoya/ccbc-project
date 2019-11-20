@@ -46,14 +46,14 @@ export default class Home extends PureComponent {
         { notice_dt: "2019/03/15", title: "HARVESTに関するプレスリリースしました。" },
       ],
       newArticleList: [
-        { title: "マラソン大会へのお誘い", hashtagStr: "#スポーツ　#マラソン　", file_path: "test001.png", shain_image_path: "", goodCnt: 12 },
-        { title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
-        { title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
+        { t_kiji_pk: 1, title: "マラソン大会へのお誘い", hashtagStr: "#スポーツ　#マラソン　", file_path: "test001.png", shain_image_path: "", goodCnt: 12 },
+        { t_kiji_pk: 2, title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
+        { t_kiji_pk: 3, title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
       ],
       popularArticleList: [
-        { title: "マラソン大会へのお誘い", hashtagStr: "#スポーツ　#マラソン　", file_path: "test001.png", shain_image_path: "", goodCnt: 12 },
-        { title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
-        { title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
+        { t_kiji_pk: 1, title: "マラソン大会へのお誘い", hashtagStr: "#スポーツ　#マラソン　", file_path: "test001.png", shain_image_path: "", goodCnt: 12 },
+        { t_kiji_pk: 2, title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
+        { t_kiji_pk: 3, title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
       ]
     })
   }
@@ -101,6 +101,7 @@ export default class Home extends PureComponent {
         <View style={[{ flex: 0.1 }]}>
           <Text />
         </View>
+
         {/* -- 広告 -- */}
         <View style={{ flex: 1.0, flexDirection: 'row' }}>
           <View style={styles.container}>
@@ -119,6 +120,7 @@ export default class Home extends PureComponent {
             <View>{this.pagination}</View>
           </View>
         </View>
+
         {/* -- お知らせ -- */}
         <View style={{ flex: 0.1, backgroundColor: 'rgba(255, 136, 0, 0.92)', flexDirection: 'row', alignItems: 'center' }}>
           <Image resizeMode="contain" source={require('./../images/icons8-post-box-24.png')} />
@@ -140,6 +142,7 @@ export default class Home extends PureComponent {
             )
           })}
         </View>
+
         {/* -- 最新の記事 -- */}
         <View style={{ flex: 0.1, backgroundColor: 'rgba(255, 136, 0, 0.92)', flexDirection: 'row', alignItems: 'center' }}>
           <Image resizeMode="contain" source={require('./../images/icons8-news-24.png')} />
@@ -153,52 +156,61 @@ export default class Home extends PureComponent {
             もっと見る>
           </Text>
         </View>
+
         <View style={[{ flex: 0.6, flexDirection: 'row' }]}>
           {/* 最新の記事の件数分、繰り返し（横スクロール） */}
           <ScrollView horizontal={true}>
             {this.state.newArticleList.map((item, i) => {
               return (
-                <Card containerStyle={{ height: 120, width: 150 }} key={i}>
-                  {/* TODO : onPressで画面遷移 */}
-                  {/* 画像 */}
-                  <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
-                    {item.file_path !== "" &&
-                      <Image
-                        source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
-                        style={{ width: 60, height: 60 }}
-                      />
-                    }
-                    {/* 画像が未登録の場合は社員の顔写真を表示 */}
-                    {item.file_path === "" &&
-                      <Image
-                        source={{ uri: restdomain + `/uploads/${item.shain_image_path}` }}
-                        style={{ width: 60, height: 60 }}
-                      />
-                    }
-                  </View>
-                  {/* タイトル */}
-                  <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginBottom: 10 }}>
-                    {item.title}
-                  </Text>
-                  {/* ハッシュタグ */}
-                  <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ color: '#808080', marginTop: -10 }}>
-                    {item.hashtagStr}
-                  </Text>
-                  {/* いいね */}
-                  <View style={[{ flexDirection: 'row' }]}>
-                    <Image
-                      resizeMode="contain"
-                      source={require('./../images/icons8-thumbs-up-24_2.png')}
-                    />
-                    <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}>
-                      {' '}{item.goodCnt}
+                <TouchableOpacity key={i}
+                  activeOpacity={1}
+                  onPress={() => this.props.navigation.navigate('ArticleRefer', {
+                    mode: "home",
+                    selectKijiPk: item.t_kiji_pk
+                  })}>
+                  <Card containerStyle={{ height: 120, width: 150 }}>
+                    {/* 画像 */}
+                    <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
+                      {item.file_path !== "" &&
+                        <Image
+                          source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
+                          style={{ width: 60, height: 60 }}
+                        />
+                      }
+                      {/* 画像が未登録の場合は社員の顔写真を表示 */}
+                      {item.file_path === "" &&
+                        <Image
+                          source={{ uri: restdomain + `/uploads/${item.shain_image_path}` }}
+                          style={{ width: 60, height: 60 }}
+                        />
+                      }
+                    </View>
+                    {/* タイトル */}
+                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginBottom: 10 }}>
+                      {item.title}
                     </Text>
-                  </View>
-                </Card>
+                    {/* ハッシュタグ */}
+                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ color: '#808080', marginTop: -10 }}>
+                      {item.hashtagStr}
+                    </Text>
+                    {/* いいね */}
+                    <View style={[{ flexDirection: 'row' }]}>
+                      <Image
+                        resizeMode="contain"
+                        source={require('./../images/good-on.png')}
+                        style={{ width: 25, height: 25 }}
+                      />
+                      <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 18 }}>
+                        {' '}{item.goodCnt}
+                      </Text>
+                    </View>
+                  </Card>
+                </TouchableOpacity>
               )
             })}
           </ScrollView>
         </View>
+
         {/* -- 人気の記事 -- */}
         <View style={{ flex: 0.1, backgroundColor: 'rgba(255, 136, 0, 0.92)', flexDirection: 'row', alignItems: 'center' }}>
           <Image resizeMode="contain" source={require('./../images/icons8-thumbs-up-24.png')} />
@@ -212,52 +224,61 @@ export default class Home extends PureComponent {
             もっと見る>
           </Text>
         </View>
+
         <View style={[{ flex: 0.6 }]}>
           {/* 人気の記事の件数分、繰り返し（横スクロール） */}
           <ScrollView horizontal={true}>
             {this.state.popularArticleList.map((item, i) => {
               return (
-                <Card containerStyle={{ height: 120, width: 150 }} key={i}>
-                  {/* TODO : onPressで画面遷移 */}
-                  {/* 画像 */}
-                  <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
-                    {item.file_path !== "" &&
-                      <Image
-                        source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
-                        style={{ width: 60, height: 60 }}
-                      />
-                    }
-                    {/* 画像が未登録の場合は社員の顔写真を表示 */}
-                    {item.file_path === "" &&
-                      <Image
-                        source={{ uri: restdomain + `/uploads/${item.shain_image_path}` }}
-                        style={{ width: 60, height: 60 }}
-                      />
-                    }
-                  </View>
-                  {/* タイトル */}
-                  <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginBottom: 10 }}>
-                    {item.title}
-                  </Text>
-                  {/* ハッシュタグ */}
-                  <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ color: '#808080', marginTop: -10 }}>
-                    {item.hashtagStr}
-                  </Text>
-                  {/* いいね */}
-                  <View style={[{ flexDirection: 'row' }]}>
-                    <Image
-                      resizeMode="contain"
-                      source={require('./../images/icons8-thumbs-up-24_2.png')}
-                    />
-                    <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}>
-                      {' '}{item.goodCnt}
+                <TouchableOpacity key={i}
+                  activeOpacity={1}
+                  onPress={() => this.props.navigation.navigate('ArticleRefer', {
+                    mode: "home",
+                    selectKijiPk: item.t_kiji_pk
+                  })}>
+                  <Card containerStyle={{ height: 120, width: 150 }}>
+                    {/* 画像 */}
+                    <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
+                      {item.file_path !== "" &&
+                        <Image
+                          source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
+                          style={{ width: 60, height: 60 }}
+                        />
+                      }
+                      {/* 画像が未登録の場合は社員の顔写真を表示 */}
+                      {item.file_path === "" &&
+                        <Image
+                          source={{ uri: restdomain + `/uploads/${item.shain_image_path}` }}
+                          style={{ width: 60, height: 60 }}
+                        />
+                      }
+                    </View>
+                    {/* タイトル */}
+                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginBottom: 10 }}>
+                      {item.title}
                     </Text>
-                  </View>
-                </Card>
+                    {/* ハッシュタグ */}
+                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ color: '#808080', marginTop: -10 }}>
+                      {item.hashtagStr}
+                    </Text>
+                    {/* いいね */}
+                    <View style={[{ flexDirection: 'row' }]}>
+                      <Image
+                        resizeMode="contain"
+                        source={require('./../images/good-on.png')}
+                        style={{ width: 25, height: 25 }}
+                      />
+                      <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 18 }}>
+                        {' '}{item.goodCnt}
+                      </Text>
+                    </View>
+                  </Card>
+                </TouchableOpacity>
               )
             })}
           </ScrollView>
         </View>
+
         {/* -- 各機能アイコン -- */}
         <View style={[{ flex: 0.3, flexDirection: 'row' }]}>
           <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
@@ -275,11 +296,15 @@ export default class Home extends PureComponent {
             <Text>買い物</Text>
           </View>
           <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-            <Image
-              resizeMode="contain"
-              source={require('./../images/icons8-brainstorm-skill-48.png')}
-            />
-            <Text>情報ひろば</Text>
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => this.props.navigation.navigate('ArticleSelect')}>
+              <Image
+                resizeMode="contain"
+                source={require('./../images/icons8-brainstorm-skill-48.png')}
+              />
+              <Text>情報ひろば</Text>
+            </TouchableOpacity>
           </View>
           <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <Image

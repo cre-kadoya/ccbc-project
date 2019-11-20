@@ -16,9 +16,9 @@ export default class ArticleEntry extends Component {
     super(props)
     this.state = {
       login_shain_pk: null,
-      selectKijiCategory: null,
-      selectKiji: null,
-      editKiji: {
+      selectCategory: null,
+      selectArticle: null,
+      editArticle: {
         t_kiji_pk: null,
         t_kiji_category_pk: null,
         t_shain_pk: null,
@@ -46,30 +46,30 @@ export default class ArticleEntry extends Component {
     this.getPermissionAsync()
 
     // 記事照会画面からのパラメータ受け取り
-    var selectKijiCategory = this.props.navigation.getParam("selectKijiCategory")
-    var selectKiji = this.props.navigation.getParam("selectKiji")
-    var editKiji = this.state.editKiji
-    if (selectKiji != null) {
+    var selectCategory = this.props.navigation.getParam("selectCategory")
+    var selectArticle = this.props.navigation.getParam("selectArticle")
+    var editArticle = this.state.editArticle
+    if (selectArticle != null) {
       // 編集時
-      editKiji.t_kiji_pk = selectKiji.t_kiji_pk
-      editKiji.t_kiji_category_pk = selectKiji.t_kiji_category_pk
-      editKiji.t_shain_pk = selectKiji.t_shain_pk
-      editKiji.title = selectKiji.title
-      editKiji.contents = selectKiji.contents
-      editKiji.post_dt = selectKiji.post_dt
-      editKiji.post_tm = selectKiji.post_tm
-      editKiji.file_path = selectKiji.file_path
-      editKiji.hashtag = selectKiji.hashtag
-      editKiji.hashtagStr = selectKiji.hashtagStr
+      editArticle.t_kiji_pk = selectArticle.t_kiji_pk
+      editArticle.t_kiji_category_pk = selectArticle.t_kiji_category_pk
+      editArticle.t_shain_pk = selectArticle.t_shain_pk
+      editArticle.title = selectArticle.title
+      editArticle.contents = selectArticle.contents
+      editArticle.post_dt = selectArticle.post_dt
+      editArticle.post_tm = selectArticle.post_tm
+      editArticle.file_path = selectArticle.file_path
+      editArticle.hashtag = selectArticle.hashtag
+      editArticle.hashtagStr = selectArticle.hashtagStr
     } else {
       // 新規投稿時
-      editKiji.t_kiji_category_pk = selectKijiCategory.t_kiji_category_pk
-      editKiji.t_shain_pk = this.state.login_shain_pk
+      editArticle.t_kiji_category_pk = selectCategory.t_kiji_category_pk
+      editArticle.t_shain_pk = this.state.login_shain_pk
     }
     this.setState({
-      selectKijiCategory: selectKijiCategory,
-      selectKiji: selectKiji,
-      editKiji: editKiji
+      selectCategory: selectCategory,
+      selectArticle: selectArticle,
+      editArticle: editArticle
     })
   }
 
@@ -85,14 +85,14 @@ export default class ArticleEntry extends Component {
   /** 記事投稿ボタン押下 */
   onClickEntry = async () => {
     // 入力チェック
-    if (this.state.editKiji.title == "") {
+    if (this.state.editArticle.title == "") {
       this.setState({
         alertDialogVisible: true,
         alertDialogMessage: "タイトルを入力してください"
       })
       return
     }
-    if (this.state.editKiji.contents == "") {
+    if (this.state.editArticle.contents == "") {
       this.setState({
         alertDialogVisible: true,
         alertDialogMessage: "記事の内容を入力してください"
@@ -107,16 +107,17 @@ export default class ArticleEntry extends Component {
     })
   }
 
+  /** 記事更新処理 */
   entry = async () => {
     this.setState({ confirmDialogVisible: false })
 
     // APIパラメータ作成
     const data = new FormData()
-    let editItem = this.state.editKiji
+    let editItem = this.state.editArticle
     let fileName = ""
     if (this.state.imageData.uri !== "") {
       // 画像ファイル
-      fileName = moment(new Date()).format('YYYYMMDDHHmmssSS')
+      fileName = moment(new Date()).format('YYYYMMDDHHmmssSS') + ".png"
       data.append('imageData', {
         uri: this.state.imageData.uri,
         type: this.state.imageData.type,
@@ -127,9 +128,9 @@ export default class ArticleEntry extends Component {
     editItem.post_dt = new Date()
     editItem.post_tm = new Date()
     this.setState({
-      editKiji: editItem
+      editArticle: editItem
     })
-    data.append('editKiji', this.state.editKiji)
+    data.append('editArticle', this.state.editArticle)
 
     // 記事API.投稿処理の呼び出し（DB登録→BC登録）
     await fetch(restdomain + '/article/edit', {
@@ -151,7 +152,8 @@ export default class ArticleEntry extends Component {
           } else {
             // 記事照会画面に戻る
             this.props.navigation.navigate('ArticleRefer', {
-              selectKijiCategory: this.state.selectKijiCategory
+              mode: "article",
+              selectCategory: this.state.selectCategory
             })
           }
         }.bind(this)
@@ -189,113 +191,112 @@ export default class ArticleEntry extends Component {
 
         {/* -- 入力部 -- */}
         <KeyboardAvoidingView behavior="padding">
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={{ padding: 10 }}>
-              <View>
-                {/* 投稿先カテゴリ（表示のみ） */}
-                <Text style={styles.inputTitle}>投稿先</Text>
-                <TextInput
-                  style={{ fontSize: 16, color: 'black', padding: 5 }}
-                  value={this.state.selectKijiCategory.category_nm}
-                  editable={false}
-                />
-              </View>
-              <View>
-                {/* タイトル */}
-                <Text style={styles.inputTitle}>タイトル</Text>
-                <TextInput
-                  style={styles.inputText}
-                  value={this.state.editKiji.title}
-                  onChangeText={text => {
-                    let editItem = this.state.editKiji
-                    editItem.title = text
-                    this.setState({
-                      editKiji: editItem
-                    })
-                  }}
-                />
-              </View>
-              <View>
-                {/* ハッシュタグ */}
-                <Text style={styles.inputTitle}>タグ（スペース区切り #は不要）</Text>
-                <TextInput
-                  style={styles.inputText}
-                  value={this.state.editKiji.hashtagStr.replace(/#/g, ' ')}
-                  onChangeText={text => {
-                    let editItem = this.state.editKiji
-                    editItem.hashtagStr = text
-                    this.setState({
-                      editKiji: editItem
-                    })
-                  }}
-                />
-              </View>
-              <View
-                style={{
-                  marginTop: 10,
-                  marginButtom: 10
-                }}
-              >
-                {/* 記事内容 */}
-                <Text style={styles.inputTitle}>
-                  記事
-                </Text>
-                <TextInput
-                  multiline={true}
-                  numberOfLines={8}
-                  style={[styles.inputText, { textAlignVertical: 'top' }]}
-                  value={this.state.editKiji.contents}
-                  onChangeText={text => {
-                    let editItem = this.state.editKiji
-                    editItem.contents = text
-                    this.setState({
-                      editKiji: editItem
-                    })
-                  }}
-                />
-              </View>
-              {/* 画像 */}
-              {(this.state.editKiji.file_path !== "" && this.state.imageData.uri === "") && (
-                <View style={{ marginTop: 10 }}>
-                  <Image
-                    source={{ uri: restdomain + `/uploads/article/${this.state.editKiji.file_path}` }}
-                    style={{ width: 300, height: 300 }} />
-                </View>
-              )}
-              <TouchableHighlight onPress={() => this.onClickPickImage()}>
-                <Text>画像選択</Text>
-              </TouchableHighlight>
-              {this.state.imageData.uri !== "" && (
+          <View style={{ height: "90%" }}>
+            <ScrollView>
+              <View style={{ padding: 10 }}>
                 <View>
-                  <Image
-                    source={{ uri: this.state.imageData.uri }}
-                    style={{
-                      width: 250,
-                      height: 250,
-                      marginTop: 30,
-                      marginBottom: 30
+                  {/* 投稿先カテゴリ（表示のみ） */}
+                  <Text style={styles.inputTitle}>投稿先</Text>
+                  <TextInput
+                    style={{ fontSize: 16, color: 'black', padding: 5 }}
+                    value={this.state.selectCategory.category_nm}
+                    editable={false}
+                  />
+                </View>
+                <View>
+                  {/* タイトル */}
+                  <Text style={styles.inputTitle}>タイトル</Text>
+                  <TextInput
+                    style={styles.inputText}
+                    value={this.state.editArticle.title}
+                    onChangeText={text => {
+                      let editItem = this.state.editArticle
+                      editItem.title = text
+                      this.setState({
+                        editArticle: editItem
+                      })
                     }}
                   />
                 </View>
-              )}
-            </View>
-
-            {/* -- 投稿ボタン -- */}
-            <View style={{ flexDirection: 'row' }}>
-              <View style={{ flex: 1 }}>
-                <TouchableHighlight onPress={() => this.onClickEntry()}>
-                  <View style={styles.saveButtonView}>
-                    <View style={styles.saveButtonTitleView}>
-                      <Text style={styles.saveButtonTitleText}>投稿する</Text>
-                    </View>
+                <View>
+                  {/* ハッシュタグ */}
+                  <Text style={styles.inputTitle}>タグ（スペース区切り #は不要）</Text>
+                  <TextInput
+                    style={styles.inputText}
+                    value={this.state.editArticle.hashtagStr.replace(/#/g, ' ')}
+                    onChangeText={text => {
+                      let editItem = this.state.editArticle
+                      editItem.hashtagStr = text
+                      this.setState({
+                        editArticle: editItem
+                      })
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    marginTop: 10,
+                    marginButtom: 10
+                  }}
+                >
+                  {/* 記事内容 */}
+                  <Text style={styles.inputTitle}>
+                    記事
+                </Text>
+                  <TextInput
+                    multiline={true}
+                    numberOfLines={8}
+                    style={[styles.inputText, { textAlignVertical: 'top' }]}
+                    value={this.state.editArticle.contents}
+                    onChangeText={text => {
+                      let editItem = this.state.editArticle
+                      editItem.contents = text
+                      this.setState({
+                        editArticle: editItem
+                      })
+                    }}
+                  />
+                </View>
+                {/* 画像 */}
+                {(this.state.editArticle.file_path !== "" && this.state.imageData.uri === "") && (
+                  <View style={{ marginTop: 10 }}>
+                    <Image
+                      source={{ uri: restdomain + `/uploads/article/${this.state.editArticle.file_path}` }}
+                      style={{ width: 300, height: 300 }} />
                   </View>
+                )}
+                <TouchableHighlight onPress={() => this.onClickPickImage()}>
+                  <Text>画像選択</Text>
                 </TouchableHighlight>
+                {this.state.imageData.uri !== "" && (
+                  <View>
+                    <Image
+                      source={{ uri: this.state.imageData.uri }}
+                      style={{
+                        width: 250,
+                        height: 250,
+                        marginTop: 30,
+                        marginBottom: 30
+                      }}
+                    />
+                  </View>
+                )}
               </View>
-            </View>
 
-            {/* スクロールが最下部まで表示されないことの暫定対応... */}
-            <View style={{ marginBottom: 200 }} />
-          </ScrollView>
+              {/* -- 投稿ボタン -- */}
+              <View style={{ flexDirection: 'row' }}>
+                <View style={{ flex: 1 }}>
+                  <TouchableHighlight onPress={() => this.onClickEntry()}>
+                    <View style={styles.saveButtonView}>
+                      <View style={styles.saveButtonTitleView}>
+                        <Text style={styles.saveButtonTitleText}>投稿する</Text>
+                      </View>
+                    </View>
+                  </TouchableHighlight>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
         </KeyboardAvoidingView>
 
         {/* -- 確認ダイアログ -- */}
