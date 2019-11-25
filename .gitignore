@@ -65,4 +65,5 @@ typings/
 
 # 固有の除外ファイル
 ccbc-comcomcoin/.expo/*
-ccbc-rest/public/uploads/*
+ccbc-rest/public/uploads/advertise/*
+ccbc-rest/public/uploads/article/*
