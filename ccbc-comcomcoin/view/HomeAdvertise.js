@@ -1,11 +1,12 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { StyleSheet, View, Image, ScrollView } from 'react-native'
 import { Text } from 'react-native-elements'
+import BaseComponent from './components/BaseComponent'
 import InAppHeader from './components/InAppHeader'
 
 const restdomain = require('./common/constans.js').restdomain
 
-export default class HomeAdvertise extends Component {
+export default class HomeAdvertise extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
@@ -16,25 +17,33 @@ export default class HomeAdvertise extends Component {
 
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
-    const renban = this.props.navigation.getParam("renban")
-
-    // TODO : テストデータ
-    this.setState({
-      file_path: "CONSADOLE.png",
-      comment: "サッカーＪ１　コンサドーレ札幌の観戦案内です。\n" +
-        "■8月10日（土）14:00キックオフ　vs 浦和レッズ\n" +
-        "■8月24日（土）13:00キックオフ　vs FC東京\n" +
-        "場所はいずれも札幌ドーム。\n" +
-        "チケットは「浦和レッズ戦　7枚」「FC東京戦　7枚」です。\n\n" +
-        "観戦を希望される方は、三上まで連絡ください。\n" +
-        "※締め切りは、6月19日（水）17時。\n" +
-        "\n" +
-        "※締め切りは上記の通りですが、チケットの数に限りがあることと、観戦当日までの段取りの調整を鑑み、早めの連絡をお願いいたします。\n" +
-        "\n\n" +
-        "ご存知の通り、今年度から弊社はコンサドーレ札幌のサポートシップ・パートナーとなりました。\n\n" +
-        "5月4日のヴィッセル神戸戦を観戦したメンバーから好評をいただき、サッカーを知らない人でも楽しめたようです。\n\n" +
-        "みなさん、北海道のプロスポーツを応援し、北海道を元気にしましょう！\n"
+    // ログイン情報の取得（BaseComponent）
+    await this.getLoginInfo()
+    
+    // ホームAPI.ComComCoinホーム広告情報取得処理の呼び出し
+    await fetch(restdomain + '/comcomcoin_home/findHomeAdvertise', {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(this.state),
+      headers: new Headers({ 'Content-type': 'application/json' })
     })
+      .then(function (response) {
+        return response.json()
+      })
+      .then(
+        function (json) {
+          // 結果が取得できない場合は終了
+          if (typeof json.data === 'undefined') {
+            return
+          }
+          // 取得したデータをStateに格納
+          this.setState({
+            file_path: json.data.file_path,
+            comment: json.data.comment
+          })
+        }.bind(this)
+      )
+      .catch(error => console.error(error))
   }
 
   render() {

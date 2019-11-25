@@ -1,22 +1,23 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { StyleSheet, Text, View, TouchableHighlight } from 'react-native'
 import { Icon } from 'react-native-elements'
+import BaseComponent from './components/BaseComponent'
 import InAppHeader from './components/InAppHeader'
 
 const restdomain = require('./common/constans.js').restdomain
 
-export default class ArticleSelect extends Component {
+export default class ArticleSelect extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
-      login_shain_pk: null,
       categoryList: []
     }
   }
 
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
-    this.setState({ login_shain_pk: 1 })
+    // ログイン情報の取得（BaseComponent）
+    await this.getLoginInfo()
 
     // 記事API.記事カテゴリ一覧取得処理の呼び出し
     await fetch(restdomain + '/article/findCategory', {

@@ -1,20 +1,20 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { StyleSheet, Text, View, Image, ScrollView, Modal, TextInput, TouchableOpacity } from 'react-native'
 import { Icon, Avatar, Card } from 'react-native-elements'
 import moment from 'moment'
 import 'moment/locale/ja'
+import BaseComponent from './components/BaseComponent'
 import InAppHeader from './components/InAppHeader'
 
 const restdomain = require('./common/constans.js').restdomain
 const goodImageOn = require("./../images/good-on.png")
 const goodImageOff = require("./../images/good-off.png")
 
-export default class ArticleRefer extends Component {
+export default class ArticleRefer extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
       mode: "",
-      login_shain_pk: null,
       current_kiji_category_pk: null,
       selectCategory: {
         t_kiji_category_pk: null,
@@ -32,7 +32,8 @@ export default class ArticleRefer extends Component {
 
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
-    this.state.login_shain_pk = 1
+    // ログイン情報の取得（BaseComponent）
+    await this.getLoginInfo()
 
     // パラメータを受け取り、どの画面から遷移したかを判断
     const mode = this.props.navigation.getParam("mode")

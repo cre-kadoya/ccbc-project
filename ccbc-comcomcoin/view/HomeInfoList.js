@@ -1,11 +1,14 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { StyleSheet, View, ScrollView } from 'react-native'
 import { Card, ListItem } from 'react-native-elements'
 import moment from 'moment'
 import 'moment/locale/ja'
+import BaseComponent from './components/BaseComponent'
 import InAppHeader from './components/InAppHeader'
 
-export default class HomeInfoList extends Component {
+const restdomain = require('./common/constans.js').restdomain
+
+export default class HomeInfoList extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
@@ -15,81 +18,32 @@ export default class HomeInfoList extends Component {
 
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
-    // TODO : テストデータ
-    this.setState({
-      inforList: [
-        {
-          renban: 1,
-          title: '北海道新聞にHARVESTの記事が掲載されました。',
-          notice_dt: '2019/04/12'
-        },
-        {
-          renban: 2,
-          title: 'HARVESTに関するプレスリリースしました。',
-          notice_dt: '2019/03/15'
-        },
-        {
-          renban: 3,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban: 4,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban: 5,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban: 6,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban: 7,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban:8,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban: 9,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban: 10,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban: 11,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban: 12,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban: 13,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        },
-        {
-          renban: 14,
-          title: '財界さっぽろ様の企業特集に掲載されました。',
-          notice_dt: '2018/09/15'
-        }
-      ]
+    // ログイン情報の取得（BaseComponent）
+    await this.getLoginInfo()
+    
+    // ホームAPI.ComComCoinホームお知らせ一覧取得処理の呼び出し
+    await fetch(restdomain + '/comcomcoin_home/findHomeInfoList', {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(this.state),
+      headers: new Headers({ 'Content-type': 'application/json' })
     })
+      .then(function (response) {
+        return response.json()
+      })
+      .then(
+        function (json) {
+          // 結果が取得できない場合は終了
+          if (typeof json.data === 'undefined') {
+            return
+          }
+          // 取得したデータをStateに格納
+          this.setState({
+            inforList: json.data
+          })
+        }.bind(this)
+      )
+      .catch(error => console.error(error))
   }
 
   render() {

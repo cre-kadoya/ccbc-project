@@ -1,21 +1,21 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { StyleSheet, Text, View, Image, ScrollView, TextInput, TouchableHighlight, KeyboardAvoidingView } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import moment from 'moment'
 import 'moment/locale/ja'
+import BaseComponent from './components/BaseComponent'
 import InAppHeader from './components/InAppHeader'
 import ConfirmDialog from './components/ConfirmDialog'
 import AlertDialog from './components/AlertDialog'
 
 const restdomain = require('./common/constans.js').restdomain
 
-export default class ArticleEntry extends Component {
+export default class ArticleEntry extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
-      login_shain_pk: null,
       selectCategory: null,
       selectArticle: null,
       editArticle: {
@@ -43,12 +43,16 @@ export default class ArticleEntry extends Component {
 
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
+    // ログイン情報の取得（BaseComponent）
+    await this.getLoginInfo()
+
+    // スマホの画像機能へのアクセス許可
     this.getPermissionAsync()
 
     // 記事照会画面からのパラメータ受け取り
-    var selectCategory = this.props.navigation.getParam("selectCategory")
-    var selectArticle = this.props.navigation.getParam("selectArticle")
-    var editArticle = this.state.editArticle
+    const selectCategory = this.props.navigation.getParam("selectCategory")
+    const selectArticle = this.props.navigation.getParam("selectArticle")
+    let editArticle = this.state.editArticle
     if (selectArticle != null) {
       // 編集時
       editArticle.t_kiji_pk = selectArticle.t_kiji_pk

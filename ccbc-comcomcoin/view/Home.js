@@ -1,20 +1,20 @@
-import React, { PureComponent } from 'react'
+import React from 'react'
 import { Dimensions, StyleSheet, View, Text, Image, ScrollView, TouchableOpacity } from 'react-native'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
 import { Card } from 'react-native-elements'
 import moment from 'moment'
 import 'moment/locale/ja'
+import BaseComponent from './components/BaseComponent'
 
 const restdomain = require('./common/constans.js').restdomain
 const windowWidth = Dimensions.get('window').width
 
-export default class Home extends PureComponent {
+export default class Home extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
       activeSlide: 0,
       adList: [],
-      adList2: [],
       infoList: [],
       newArticleList: [],
       popularArticleList: []
@@ -23,39 +23,36 @@ export default class Home extends PureComponent {
 
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
-    // TODO : テストデータ
-    this.setState({
-      activeSlide: 0,
-      adList: [
-        { renban: 1, file_path: 'kokoku_1.jpg' },
-        { renban: 2, file_path: 'kokoku_2.jpg' },
-        { renban: 3, file_path: 'kokoku_3.jpg' },
-        { renban: 4, file_path: 'kokoku_4.jpg' },
-        { renban: 5, file_path: 'CONSADOLE.png' },
-      ],
-      adList2: [
-        'kokoku_1.jpg',
-        'kokoku_2.jpg',
-        'kokoku_3.jpg',
-        'kokoku_4.jpg',
-        'CONSADOLE.png',
-      ],
-      infoList: [
-        { notice_dt: "2019/04/12", title: "北海道新聞にHARVESTの記事が掲載されました。" },
-        { notice_dt: "2019/03/15", title: "HARVESTに関するプレスリリースしました。" },
-        { notice_dt: "2019/03/15", title: "HARVESTに関するプレスリリースしました。" },
-      ],
-      newArticleList: [
-        { t_kiji_pk: 1, title: "マラソン大会へのお誘い", hashtagStr: "#スポーツ　#マラソン　", file_path: "test001.png", shain_image_path: "", goodCnt: 12 },
-        { t_kiji_pk: 2, title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
-        { t_kiji_pk: 3, title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
-      ],
-      popularArticleList: [
-        { t_kiji_pk: 1, title: "マラソン大会へのお誘い", hashtagStr: "#スポーツ　#マラソン　", file_path: "test001.png", shain_image_path: "", goodCnt: 12 },
-        { t_kiji_pk: 2, title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
-        { t_kiji_pk: 3, title: "ビアガーデン開催", hashtagStr: "#飲み会　#お店　", file_path: "", goodCnt: 0 },
-      ]
+    // ログイン情報の取得（BaseComponent）
+    await this.getLoginInfo()
+
+    // ホームAPI.ComComCoinホーム情報取得処理の呼び出し
+    await fetch(restdomain + '/comcomcoin_home/findHome', {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(this.state),
+      headers: new Headers({ 'Content-type': 'application/json' })
     })
+      .then(function (response) {
+        return response.json()
+      })
+      .then(
+        function (json) {
+          // 結果が取得できない場合は終了
+          if (typeof json.data === 'undefined') {
+            return
+          }
+          // 取得したデータをStateに格納
+          this.setState({
+            activeSlide: 0,
+            adList: json.data.adList,
+            infoList: json.data.infoList,
+            newArticleList: json.data.newArticleList,
+            popularArticleList: json.data.popularArticleList
+          })
+        }.bind(this)
+      )
+      .catch(error => console.error(error))
   }
 
   renderItem = ({ item, index }) => (
@@ -177,10 +174,10 @@ export default class Home extends PureComponent {
                           style={{ width: 60, height: 60 }}
                         />
                       }
-                      {/* 画像が未登録の場合は社員の顔写真を表示 */}
+                      {/* 画像が未登録の場合はNo-Imageを表示 */}
                       {item.file_path === "" &&
                         <Image
-                          source={{ uri: restdomain + `/uploads/${item.shain_image_path}` }}
+                          source={require('./../images/icon-noimage.png')}
                           style={{ width: 60, height: 60 }}
                         />
                       }
@@ -245,10 +242,10 @@ export default class Home extends PureComponent {
                           style={{ width: 60, height: 60 }}
                         />
                       }
-                      {/* 画像が未登録の場合は社員の顔写真を表示 */}
+                      {/* 画像が未登録の場合はNo-Imageを表示 */}
                       {item.file_path === "" &&
                         <Image
-                          source={{ uri: restdomain + `/uploads/${item.shain_image_path}` }}
+                          source={require('./../images/icon-noimage.png')}
                           style={{ width: 60, height: 60 }}
                         />
                       }
@@ -307,11 +304,17 @@ export default class Home extends PureComponent {
             </TouchableOpacity>
           </View>
           <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-            <Image
-              resizeMode="contain"
-              source={require('./../images/icons8-services-48.png')}
-            />
-            <Text>設定</Text>
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => this.props.navigation.navigate('HomeArticleList', {
+                mode: "favorite"
+              })}>
+              <Image
+                resizeMode="contain"
+                source={require('./../images/icons8-services-48.png')}
+              />
+              <Text>お気に入り</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>

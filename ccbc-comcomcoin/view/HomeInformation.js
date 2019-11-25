@@ -1,11 +1,14 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { StyleSheet, View, ScrollView } from 'react-native'
 import { Text } from 'react-native-elements'
 import moment from 'moment'
 import 'moment/locale/ja'
+import BaseComponent from './components/BaseComponent'
 import InAppHeader from './components/InAppHeader'
 
-export default class HomeInformation extends Component {
+const restdomain = require('./common/constans.js').restdomain
+
+export default class HomeInformation extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
@@ -17,19 +20,39 @@ export default class HomeInformation extends Component {
 
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
+    // ログイン情報の取得（BaseComponent）
+    await this.getLoginInfo()
+
+    // 引き継ぎパラメータの取得
     const renban = this.props.navigation.getParam("renban")
-    
-    // TODO : テストデータ
-    this.setState({
-      title: "HARVESTに関するプレスリリースしました。",
-      comment: "アプリケーション・ソフトウェア開発を行う株式会社クリエイティブ・コンサルタント（本社：北海道札幌市、代表取締役：斉藤雅之）は3月22日、ブロックチェーン技術を活用した企業向け社内仮想通貨（以下、企業コイン）サービス「HARVEST」と「ComComCoin」を発表しました。\n\n" +
-        "▼お問い合わせ先\n" +
-        "株式会社クリエイティブ・コンサルタント\n\n" +
-        "〒060-0031　札幌市中央区北１条東２丁目５番地３　塚本ビル北１館２階\n" +
-        "TEL 011-210-7130\n" +
-        "E-Mail：press@hokkaido-ima.co.jp（担当者：坂本 義和）",
-      notice_dt: new Date(),
+    this.state.renban = renban
+
+    // ホームAPI.ComComCoinホームお知らせ情報取得処理の呼び出し
+    await fetch(restdomain + '/comcomcoin_home/findHomeInformation', {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(this.state),
+      headers: new Headers({ 'Content-type': 'application/json' })
     })
+      .then(function (response) {
+        return response.json()
+      })
+      .then(
+        function (json) {
+          // 結果が取得できない場合は終了
+          if (typeof json.data === 'undefined') {
+            return
+          }
+          // 取得したデータをStateに格納
+          this.setState({
+            renban: renban,
+            title: json.data.title,
+            comment: json.data.comment,
+            notice_dt: json.data.notice_dt
+          })
+        }.bind(this)
+      )
+      .catch(error => console.error(error))
   }
 
   render() {

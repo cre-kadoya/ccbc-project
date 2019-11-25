@@ -5,6 +5,8 @@ const async = require('async')
 var db = require('./common/sequelize_helper.js').sequelize
 var db2 = require('./common/sequelize_helper.js')
 const bcdomain = require('./common/constans.js').bcdomain
+const jimuAccount = require('./common/constans.js').jimuAccount
+const jimuPassword = require('./common/constans.js').jimuPassword
 
 var multer = require('multer')
 var storage = multer.diskStorage({
@@ -18,6 +20,7 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage })
 
 const READ_COUNT = 10
+const GET_COIN = 10
 
 /**
  * API : findCategory
@@ -47,6 +50,7 @@ router.post('/findCategory', (req, res) => {
 router.post('/findArticle', (req, res) => {
   console.log('API : findArticle - start')
   // findArticleList(req, res)
+
   let idx = 100
   if (req.body.readLastKijiPk !== null) {
     idx = req.body.readLastKijiPk - 5
@@ -111,6 +115,7 @@ router.post('/findArticle', (req, res) => {
     status: true,
     data: resdatas
   })
+
   console.log('API : findArticle - end')
 })
 
@@ -120,6 +125,9 @@ router.post('/findArticle', (req, res) => {
  */
 router.post('/edit', upload.fields([{ name: 'imageData' }]), (req, res) => {
   console.log('API : edit - start')
+  console.log("jimuAccount:", jimuAccount)
+  console.log("jimuPassword:", jimuPassword)
+  
   // edit(req, res)
   console.log('API : edit - req.body : ' + JSON.stringify(req.body))
   console.log('API : edit - req.body.editArticle.file_path : ' + req.body.editArticle.file_path)
@@ -210,7 +218,11 @@ async function edit(req, res) {
 
   db.transaction(async function (tx) {
     // 記事テーブルの更新
-    await insertOrUpdateKiji(db, tx, req)
+    let isInsert = true
+    if (req.body.editArticle.t_kiji_pk != null && req.body.editArticle.t_kiji_pk != "") {
+      isInsert = false
+    }
+    await insertOrUpdateKiji(db, tx, req, isInsert)
 
     // 記事ハッシュタグテーブルの更新（delete and insert）
     await deleteKijiHashtag(db, tx, req)
@@ -223,6 +235,14 @@ async function edit(req, res) {
         hashtag: hashtag[i]
       }
       await insertKijiHashtag(db, tx, req, kijiHashtag)
+    }
+
+    // BCへの書き込み
+    const transactionId = await bcrequest(req)
+
+    // 贈与テーブルの追加
+    if (isInsert) {
+      await insertZoyo(db, tx, req, transactionId)
     }
   })
     .then(result => {
@@ -309,7 +329,7 @@ function selectKijiCategory(db, req) {
       " where cat.delete_flg = '0'" +
       " order by cat.t_kiji_category_pk"
     db.query(sql, {
-      replacements: { shain_pk: req.body.login_shain_pk },
+      replacements: { shain_pk: req.body.loginShainPk },
       type: db.QueryTypes.RAW
     })
       .spread((datas, metadata) => {
@@ -372,12 +392,13 @@ function selectKijiWithCond(db, req) {
       sqlcond_dt_to +
       sqlcond_hashtag +
       sqlcond_keyword +
-      " order by kij.t_kiji_pk desc"
+      " order by kij.t_kiji_pk desc" +
+      " limit " + READ_COUNT
 
     db.query(sql, {
       replacements: {
         t_kiji_category_pk: req.body.current_kiji_category_pk,
-        t_shain_pk: req.body.login_shain_pk,
+        t_shain_pk: req.body.loginShainPk,
         t_kiji_pk: req.body.t_kiji_pk,
         t_kiji_pk_read_last: req.body.readLastKijiPk,
         dt_from: req.body.searchCondYear + "/01/01",
@@ -400,11 +421,12 @@ function selectKijiWithCond(db, req) {
  * @param db SequelizeされたDBインスタンス
  * @param tx トランザクション
  * @param req リクエスト
+ * @param isInsert 追加の場合はtrue
  */
-function insertOrUpdateKiji(db, tx, req) {
+function insertOrUpdateKiji(db, tx, req, isInsert) {
   return new Promise((resolve, reject) => {
     var sql = ""
-    if (req.body.editArticle.t_kiji_pk != null && req.body.editArticle.t_kiji_pk != "") {
+    if (isInsert) {
       sql =
         "insert into t_kiji (t_kiji_category_pk, t_shain_pk, title, contents, hashtag, post_dt, post_tm, t_coin_ido_pk, file_path, delete_flg, insert_user_id, insert_tm, update_user_id, update_tm) " +
         " values (:t_kiji_category_pk, :t_shain_pk, :title, :contents, :hashtag, current_timestamp, current_timestamp, :t_coin_ido_pk, :file_path, '0', :user_id, current_timestamp, :user_id, current_timestamp) "
@@ -421,13 +443,44 @@ function insertOrUpdateKiji(db, tx, req) {
       replacements: {
         t_kiji_pk: req.body.editArticle.t_kiji_pk,
         t_kiji_category_pk: req.body.editArticle.t_kiji_category_pk,
-        t_shain_pk: req.body.login_shain_pk,
+        t_shain_pk: req.body.loginShainPk,
         title: req.body.editArticle.title,
         contents: req.body.editArticle.contents,
         hashtag: req.body.editArticle.hashtag,
         t_coin_ido_pk: null,
         file_path: req.body.editArticle.file_path,
-        user_id: req.body.login_shain_pk
+        user_id: req.body.loginShainPk
+      }
+    })
+      .spread((datas, metadata) => {
+        return resolve(datas)
+      })
+  })
+}
+
+/**
+ * 贈与情報（t_zoyo）テーブルのinsert
+ * @param db SequelizeされたDBインスタンス
+ * @param tx トランザクション
+ * @param req リクエスト
+ * @param transactionId BC登録時のトランザクションID
+ */
+function insertZoyo(db, tx, req, transactionId) {
+  return new Promise((resolve, reject) => {
+
+    var sql =
+      "iinsert into t_zoyo (zoyo_moto_shain_pk, zoyo_saki_shain_pk, transaction_id, zoyo_comment, nenji_flg, delete_flg, insert_user_id, insert_tm) " +
+      " values (:zoyo_moto_shain_pk, :zoyo_saki_shain_pk, :transaction_id, :zoyo_comment, :nenji_flg, '0', :insert_user_id, current_timestamp) "
+
+    db.query(sql, {
+      transaction: tx,
+      replacements: {
+        zoyo_moto_shain_pk: req.body.loginShainPk,
+        zoyo_saki_shain_pk: jimuAccount,
+        transaction_id: transactionId,
+        zoyo_comment: "記事投稿",
+        nenji_flg: "1",
+        insert_user_id: req.body.loginShainPk
       }
     })
       .spread((datas, metadata) => {
@@ -478,7 +531,7 @@ function insertKijiHashtag(db, tx, req, tKijiHashtag) {
         seq_no: tKijiHashtag.seq_no,
         t_kiji_category_pk: tKijiHashtag.t_kiji_category_pk,
         hashtag: tKijiHashtag.hashtag,
-        user_id: req.body.login_shain_pk
+        user_id: req.body.loginShainPk
       }
     })
       .spread((datas, metadata) => {
@@ -510,8 +563,8 @@ function insertOrUpdateGood(db, tx, req) {
       transaction: tx,
       replacements: {
         t_kiji_pk: req.body.editArticle.t_kiji_pk,
-        t_shain_pk: req.body.login_shain_pk,
-        user_id: req.body.login_shain_pk
+        t_shain_pk: req.body.loginShainPk,
+        user_id: req.body.loginShainPk
       }
     })
       .spread((datas, metadata) => {
@@ -543,8 +596,8 @@ function insertOrUpdateFavorite(db, tx, req) {
       transaction: tx,
       replacements: {
         t_kiji_pk: req.body.editArticle.t_kiji_pk,
-        t_shain_pk: req.body.login_shain_pk,
-        user_id: req.body.login_shain_pk
+        t_shain_pk: req.body.loginShainPk,
+        user_id: req.body.loginShainPk
       }
     })
       .spread((datas, metadata) => {
@@ -572,10 +625,10 @@ function insertOrUpdateKijiKidoku(db, tx, req, kijiPk) {
     db.query(sql, {
       transaction: tx,
       replacements: {
-        t_shain_pk: req.body.login_shain_pk,
+        t_shain_pk: req.body.loginShainPk,
         t_kiji_category_pk: req.body.current_kiji_category_pk,
         t_kiji_pk: kijiPk,
-        user_id: req.body.login_shain_pk
+        user_id: req.body.loginShainPk
       }
     })
       .spread((datas, metadata) => {
@@ -591,10 +644,10 @@ function insertOrUpdateKijiKidoku(db, tx, req, kijiPk) {
 function bcrequest(req) {
   return new Promise((resolve, reject) => {
     var param = {
-      from_account: [req.body.from_bcaccount],
-      to_account: [req.body.to_bcaccount],
-      password: [req.body.password],
-      coin: [req.body.zoyoCoin],
+      from_account: [jimuAccount],
+      to_account: [req.body.loginShainPk],
+      password: [jimuPassword],
+      coin: [GET_COIN],
       bc_addr: req.body.bc_addr
     }
     console.log('★★★')
