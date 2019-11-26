@@ -34,6 +34,7 @@ export default class ArticleEntry extends BaseComponent {
         uri: "",
         type: ""
       },
+      categoryNm: "",
       confirmDialogVisible: false,
       confirmDialogMessage: "",
       alertDialogVisible: false,
@@ -73,7 +74,8 @@ export default class ArticleEntry extends BaseComponent {
     this.setState({
       selectCategory: selectCategory,
       selectArticle: selectArticle,
-      editArticle: editArticle
+      editArticle: editArticle,
+      categoryNm: selectCategory.category_nm
     })
   }
 
@@ -203,7 +205,7 @@ export default class ArticleEntry extends BaseComponent {
                   <Text style={styles.inputTitle}>投稿先</Text>
                   <TextInput
                     style={{ fontSize: 16, color: 'black', padding: 5 }}
-                    value={this.state.selectCategory.category_nm}
+                    value={this.state.categoryNm}
                     editable={false}
                   />
                 </View>

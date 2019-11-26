@@ -443,7 +443,7 @@ function getHomeKiji(db, req, isNew) {
     // 最新の3件を取得
     var sql =
       "select kij.t_kiji_pk, kij.title, kij.file_path" +
-      " array_to_string(array(select '#' || hashtag from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk order by has.seq_no), '　')) as hashtagStr," +
+      " array_to_string(array(select '#' || hashtag from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk order by has.seq_no), '　') as hashtagStr," +
       " coalesce(goo.cnt, 0) as goodCnt" +
       " from t_kiji kij" +
       " left join (select t_kiji_pk, count(*) as cnt from t_good group by t_kiji_pk) goo on kij.t_kiji_pk = goo.t_kiji_pk" +
@@ -549,7 +549,7 @@ function getKijiList(db, req, mode) {
     // 最新の3件を取得
     var sql =
       "select kij.t_kiji_pk, kij.title, kij.file_path" +
-      " array_to_string(array(select '#' || hashtag from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk order by has.seq_no), '　')) as hashtagStr," +
+      " array_to_string(array(select '#' || hashtag from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk order by has.seq_no), '　') as hashtagStr," +
       " coalesce(goo.cnt, 0) as goodCnt" +
       " from t_kiji kij" +
       " left join (select t_kiji_pk, count(*) as cnt from t_good group by t_kiji_pk) goo on kij.t_kiji_pk = goo.t_kiji_pk" +

@@ -16,8 +16,8 @@ export default class MenuPh2 extends Component {
   async componentWillMount() {
     let groupInfo = {
       saveFlg: "1",
-      group_id: "Crecoin-108",
-      db_name: "harvest",
+      group_id: "CCCtest",
+      db_name: "crecoin",
       bc_addr: "0xf8be729ec16c4ad729b10202e408263d2b286f07"
     }
     let loginInfo = {

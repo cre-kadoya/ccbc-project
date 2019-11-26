@@ -83,9 +83,13 @@ export default class ArticleRefer extends BaseComponent {
           if (!isFirst) {
             data = this.state.articleList.concat(data)
           }
+          var readLastKijiPk = -1
+          if (json.data.length > 0) {
+            readLastKijiPk = json.data[json.data.length - 1].t_kiji_pk
+          }
           this.setState({
             articleList: data,
-            readLastKijiPk: json.data[json.data.length - 1].t_kiji_pk
+            readLastKijiPk: readLastKijiPk
           })
         }.bind(this)
       )
@@ -296,7 +300,7 @@ export default class ArticleRefer extends BaseComponent {
                       {moment(new Date(item.post_dt)).format('YYYY/MM/DD')}
                     </Text>
                     <Text style={styles.dateTimeText}>
-                      {moment(new Date(item.post_dt + " " + item.post_tm)).format('H:mm')}
+                      {moment(new Date(moment(new Date(item.post_dt)).format('YYYY/MM/DD') + " " + item.post_tm)).format('H:mm')}
                     </Text>
 
                     {/* 社員画像 */}
@@ -368,7 +372,7 @@ export default class ArticleRefer extends BaseComponent {
                     {/* タイトル */}
                     <Text style={{ fontSize: 16, color: 'blue' }}>
                       【{item.title}】
-                      </Text>
+                    </Text>
 
                     {/* ハッシュタグ */}
                     <Text style={{ fontSize: 12, color: 'blue' }}>
@@ -378,7 +382,7 @@ export default class ArticleRefer extends BaseComponent {
                 </View>
 
                 {/* 記事内容 */}
-                <View style={{ marginTop: 10 }}>
+                <View style={{ marginTop: 10, marginBottom: 10 }}>
                   <Text>
                     {item.contents}
                   </Text>

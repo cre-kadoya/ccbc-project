@@ -28,18 +28,18 @@ const GET_COIN = 10
  */
 router.post('/findCategory', (req, res) => {
   console.log('API : findCategory - start')
-  // findCategoryList(req, res)
-  const resdatas = [
-    { t_kiji_category_pk: 1, category_nm: "ライフハック", midoku_cnt: 0 },
-    { t_kiji_category_pk: 2, category_nm: "おすすめの本", midoku_cnt: 1 },
-    { t_kiji_category_pk: 3, category_nm: "イベント情報", midoku_cnt: 10 },
-    { t_kiji_category_pk: 4, category_nm: "美味しいお店", midoku_cnt: 0 },
-    { t_kiji_category_pk: 5, category_nm: "その他", midoku_cnt: 0 },
-  ]
-  res.json({
-    status: true,
-    data: resdatas
-  })
+  findCategoryList(req, res)
+  // const resdatas = [
+  //   { t_kiji_category_pk: 1, category_nm: "ライフハック", midoku_cnt: 0 },
+  //   { t_kiji_category_pk: 2, category_nm: "おすすめの本", midoku_cnt: 1 },
+  //   { t_kiji_category_pk: 3, category_nm: "イベント情報", midoku_cnt: 10 },
+  //   { t_kiji_category_pk: 4, category_nm: "美味しいお店", midoku_cnt: 0 },
+  //   { t_kiji_category_pk: 5, category_nm: "その他", midoku_cnt: 0 },
+  // ]
+  // res.json({
+  //   status: true,
+  //   data: resdatas
+  // })
   console.log('API : findCategory - end')
 })
 
@@ -49,72 +49,72 @@ router.post('/findCategory', (req, res) => {
  */
 router.post('/findArticle', (req, res) => {
   console.log('API : findArticle - start')
-  // findArticleList(req, res)
+  findArticleList(req, res)
 
-  let idx = 100
-  if (req.body.readLastKijiPk !== null) {
-    idx = req.body.readLastKijiPk - 5
-  }
-  const resdatas = [
-    {
-      t_kiji_pk: idx + 4, t_shain_pk: 1, title: (idx + 4) + "マラソン大会へのお誘い",
-      t_kiji_category_pk: 1,
-      contents: "今年もこの時期がやってまいりました！\n北海道の大自然の中を颯爽と走る事ができるマラソン大会です。\n自然あふれる風景を満喫しながら走りませんか？\nフルマラソンだけでなく、20kmや10kmもありますので、初心者の方も是非どうぞ。\n\n申し込み用のホームページです\nhttps://xxxxxxxxxx.jp/123456789-entry",
-      post_dt: "2019/07/15", post_tm: "10:57", file_path: "test001.png",
-      shain_nm: "佐藤　陸", shain_image_path: "",
-      hashtagStr: "#スポーツ　#マラソン　",
-      hashtag: [
-        { seq_no: 1, hashtag: "スポーツ" },
-        { seq_no: 2, hashtag: "マラソン" }],
-      good_flg: "1", favorite_flg: "0", category_nm: "イベント情報"
-    },
-    {
-      t_kiji_pk: idx + 3, t_shain_pk: 2, title: (idx + 3) + "ビアガーデン開催",
-      t_kiji_category_pk: 1,
-      contents: "どこよりも早く、会社の最寄り駅にてビアガーデンが開催されるようです。\n今年から始まるとの事で、イベントも盛り沢山みたいですね。\n\nURLを貼っておきますので、是非見てください。\nhttps://xxxxxxxxxx-xxxxx.jp\nちなみに私は来週の金曜日にチームメンバーと繰り出そうと思っています！",
-      post_dt: "2019/07/02", post_tm: "19:09", file_path: "",
-      shain_nm: "佐々木　澪", shain_image_path: "",
-      hashtagStr: "#飲み会　#お店　",
-      hashtag: [
-        { seq_no: 3, hashtag: "飲み会" },
-        { seq_no: 4, hashtag: "お店" }],
-      good_flg: "0", favorite_flg: "1", category_nm: "イベント情報"
-    },
-    {
-      t_kiji_pk: idx + 2, t_shain_pk: 3, title: (idx + 2) + "ビアガーデン開催2。会社の最寄り駅にてビアガーデンが開催されるようです。",
-      t_kiji_category_pk: 1,
-      contents: "どこよりも早く、会社の最寄り駅にてビアガーデンが開催されるようです。2",
-      post_dt: "2019/07/02", post_tm: "9:35", file_path: "",
-      shain_nm: "佐々木　澪", shain_image_path: "",
-      hashtagStr: "#飲み会　#お店　#お店　#お店　",
-      hashtag: [
-        { seq_no: 3, hashtag: "飲み会" },
-        { seq_no: 4, hashtag: "お店" }],
-      good_flg: "0", favorite_flg: "1", category_nm: "イベント情報"
-    },
-    {
-      t_kiji_pk: idx + 1, t_shain_pk: 4, title: (idx + 1) + "ビアガーデン開催3",
-      t_kiji_category_pk: 1,
-      contents: "どこよりも早く、会社の最寄り駅にてビアガーデンが開催されるようです。3",
-      post_dt: "2019/07/02", post_tm: "7:05", file_path: "",
-      shain_nm: "佐々木　澪", shain_image_path: "",
-      hashtagStr: "#飲み会　#お店　",
-      hashtag: [
-        { seq_no: 3, hashtag: "飲み会" },
-        { seq_no: 4, hashtag: "お店" }],
-      good_flg: "1", favorite_flg: "1", category_nm: "イベント情報"
-    },
-  ]
-  console.log(req.body)
-  if (req.body.searchCondKijiPk != null) {
-    resdatas.splice(3, 1)
-    resdatas.splice(2, 1)
-    resdatas.splice(1, 1)
-  }
-  res.json({
-    status: true,
-    data: resdatas
-  })
+  // let idx = 100
+  // if (req.body.readLastKijiPk !== null) {
+  //   idx = req.body.readLastKijiPk - 5
+  // }
+  // const resdatas = [
+  //   {
+  //     t_kiji_pk: idx + 4, t_shain_pk: 1, title: (idx + 4) + "マラソン大会へのお誘い",
+  //     t_kiji_category_pk: 1,
+  //     contents: "今年もこの時期がやってまいりました！\n北海道の大自然の中を颯爽と走る事ができるマラソン大会です。\n自然あふれる風景を満喫しながら走りませんか？\nフルマラソンだけでなく、20kmや10kmもありますので、初心者の方も是非どうぞ。\n\n申し込み用のホームページです\nhttps://xxxxxxxxxx.jp/123456789-entry",
+  //     post_dt: "2019/07/15", post_tm: "10:57", file_path: "test001.png",
+  //     shain_nm: "佐藤　陸", shain_image_path: "",
+  //     hashtagStr: "#スポーツ　#マラソン　",
+  //     hashtag: [
+  //       { seq_no: 1, hashtag: "スポーツ" },
+  //       { seq_no: 2, hashtag: "マラソン" }],
+  //     good_flg: "1", favorite_flg: "0", category_nm: "イベント情報"
+  //   },
+  //   {
+  //     t_kiji_pk: idx + 3, t_shain_pk: 2, title: (idx + 3) + "ビアガーデン開催",
+  //     t_kiji_category_pk: 1,
+  //     contents: "どこよりも早く、会社の最寄り駅にてビアガーデンが開催されるようです。\n今年から始まるとの事で、イベントも盛り沢山みたいですね。\n\nURLを貼っておきますので、是非見てください。\nhttps://xxxxxxxxxx-xxxxx.jp\nちなみに私は来週の金曜日にチームメンバーと繰り出そうと思っています！",
+  //     post_dt: "2019/07/02", post_tm: "19:09", file_path: "",
+  //     shain_nm: "佐々木　澪", shain_image_path: "",
+  //     hashtagStr: "#飲み会　#お店　",
+  //     hashtag: [
+  //       { seq_no: 3, hashtag: "飲み会" },
+  //       { seq_no: 4, hashtag: "お店" }],
+  //     good_flg: "0", favorite_flg: "1", category_nm: "イベント情報"
+  //   },
+  //   {
+  //     t_kiji_pk: idx + 2, t_shain_pk: 3, title: (idx + 2) + "ビアガーデン開催2。会社の最寄り駅にてビアガーデンが開催されるようです。",
+  //     t_kiji_category_pk: 1,
+  //     contents: "どこよりも早く、会社の最寄り駅にてビアガーデンが開催されるようです。2",
+  //     post_dt: "2019/07/02", post_tm: "9:35", file_path: "",
+  //     shain_nm: "佐々木　澪", shain_image_path: "",
+  //     hashtagStr: "#飲み会　#お店　#お店　#お店　",
+  //     hashtag: [
+  //       { seq_no: 3, hashtag: "飲み会" },
+  //       { seq_no: 4, hashtag: "お店" }],
+  //     good_flg: "0", favorite_flg: "1", category_nm: "イベント情報"
+  //   },
+  //   {
+  //     t_kiji_pk: idx + 1, t_shain_pk: 4, title: (idx + 1) + "ビアガーデン開催3",
+  //     t_kiji_category_pk: 1,
+  //     contents: "どこよりも早く、会社の最寄り駅にてビアガーデンが開催されるようです。3",
+  //     post_dt: "2019/07/02", post_tm: "7:05", file_path: "",
+  //     shain_nm: "佐々木　澪", shain_image_path: "",
+  //     hashtagStr: "#飲み会　#お店　",
+  //     hashtag: [
+  //       { seq_no: 3, hashtag: "飲み会" },
+  //       { seq_no: 4, hashtag: "お店" }],
+  //     good_flg: "1", favorite_flg: "1", category_nm: "イベント情報"
+  //   },
+  // ]
+  // console.log(req.body)
+  // if (req.body.searchCondKijiPk != null) {
+  //   resdatas.splice(3, 1)
+  //   resdatas.splice(2, 1)
+  //   resdatas.splice(1, 1)
+  // }
+  // res.json({
+  //   status: true,
+  //   data: resdatas
+  // })
 
   console.log('API : findArticle - end')
 })
@@ -128,7 +128,7 @@ router.post('/edit', upload.fields([{ name: 'imageData' }]), (req, res) => {
   console.log("jimuAccount:", jimuAccount)
   console.log("jimuPassword:", jimuPassword)
   
-  // edit(req, res)
+  edit(req, res)
   console.log('API : edit - req.body : ' + JSON.stringify(req.body))
   console.log('API : edit - req.body.editArticle.file_path : ' + req.body.editArticle.file_path)
   res.json({ status: true })
@@ -186,7 +186,7 @@ async function findArticleList(req, res) {
     status: true,
     data: resdatas
   })
-
+  
   // 記事既読の更新
   if (resdatas.length > 0) {
     const kijiPk = resdatas[resdatas.length - 1].t_kiji_pk
@@ -197,7 +197,6 @@ async function findArticleList(req, res) {
       .then(result => {
         // コミットしたらこっち
         console.log('正常')
-        res.json({ status: true })
       })
       .catch(e => {
         // ロールバックしたらこっち
@@ -238,7 +237,7 @@ async function edit(req, res) {
     }
 
     // BCへの書き込み
-    const transactionId = await bcrequest(req)
+    // const transactionId = await bcrequest(req)
 
     // 贈与テーブルの追加
     if (isInsert) {
@@ -320,7 +319,7 @@ function selectKijiCategory(db, req) {
       " from t_kiji_category cat" +
       " left join" +
       "  (select count(*) as midoku_cnt, kij.t_kiji_category_pk" +
-      "   from t_kiji kij left join t_kiji_kidoku kid on kij.t_kiji_category_pk and kid.t_kiji_category_pk" +
+      "   from t_kiji kij left join t_kiji_kidoku kid on kij.t_kiji_category_pk = kid.t_kiji_category_pk" +
       "   where kid.t_shain_pk = :shain_pk" +
       "   and kij.delete_flg = '0'" +
       "   and kij.t_kiji_pk > kid.t_kiji_pk" +
@@ -377,8 +376,8 @@ function selectKijiWithCond(db, req) {
     var sql =
       "select kij.t_kiji_pk, kij.t_kiji_category_pk, kij.t_shain_pk, kij.title, kij.contents, kij.post_dt, kij.post_tm, kij.file_path," +
       " sha.shimei as shain_nm, sha.image_file_nm as shain_image_path," +
-      " coalesce(goo.t_kiji_pk, '0', '1') as good_flg, coalesce(fav.t_kiji_pk, '0', '1') as favorite_flg," +
-      " array_to_string(array(select '#' || hashtag from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk order by has.seq_no), '　')) as hashtagStr," +
+      " coalesce(goo.t_kiji_pk, '1', '0') as good_flg, coalesce(fav.t_kiji_pk, '1', '0') as favorite_flg," +
+      " array_to_string(array(select '#' || hashtag from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk order by has.seq_no), '　') as hashtagStr," +
       " cat.category_nm" +
       " from t_kiji kij" +
       " inner join t_kiji_category cat on kij.t_kiji_category_pk = cat.t_kiji_category_pk" +
@@ -620,7 +619,7 @@ function insertOrUpdateKijiKidoku(db, tx, req, kijiPk) {
       " values (:t_shain_pk, :t_kiji_category_pk, :t_kiji_pk, :user_id, current_timestamp, :user_id, current_timestamp) " +
       " on conflict (t_shain_pk, t_kiji_category_pk) do " +
       "update set t_kiji_pk = :t_kiji_pk, update_user_id = :user_id, update_tm = current_timestamp" +
-      " where t_kiji_pk < :t_kiji_pk"
+      " where t_kiji_kidoku.t_kiji_pk < :t_kiji_pk"
 
     db.query(sql, {
       transaction: tx,
