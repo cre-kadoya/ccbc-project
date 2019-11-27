@@ -75,11 +75,11 @@ export default class HomeArticleList extends BaseComponent {
                     key={i}
                     titleStyle={{ fontSize: 16 }}
                     title={item.title}
-                    subtitle={item.hashtagStr}
+                    subtitle={item.hashtag_str}
                     roundAvatar
                     // avatar={item.avatar}
                     badge={{
-                      value: item.cnt + "いいね"
+                      value: item.good_cnt + "いいね"
                     }}
                     onPress={() => this.props.navigation.navigate('ArticleRefer', {
                       mode: "home",

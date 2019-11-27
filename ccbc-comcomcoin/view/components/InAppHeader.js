@@ -5,7 +5,7 @@ import { Header, Icon } from 'react-native-elements'
 class InAppHeader extends Component {
 	// Homeボタン押下
 	onPressHomeButton = () => {
-		this.props.navigate('Menu')
+		this.props.navigate('Home')
 	}
 
 	// ログアウトボタン押下

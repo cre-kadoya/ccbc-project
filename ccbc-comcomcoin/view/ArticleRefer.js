@@ -15,25 +15,36 @@ export default class ArticleRefer extends BaseComponent {
     super(props)
     this.state = {
       mode: "",
-      current_kiji_category_pk: null,
+      current_kiji_category_pk: "",
       selectCategory: {
         t_kiji_category_pk: null,
         category_nm: ""
       },
       articleList: [],
+      t_kiji_pk: "",
+      favorite_flg: "0",
+      good_flg: "0",
       searchDialogVisible: false,
-      searchCondKijiPk: null,
+      searchCondKijiPk: "",
       searchCondYear: "",
       searchCondKeyword: "",
       searchCondHashtag: "",
-      readLastKijiPk: null,
+      readLastKijiPk: "",
     }
   }
 
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
+    this.props.navigation.addListener(
+      'willFocus', () => this.onWillFocus())
+  }
+
+  /** 画面遷移時処理 */
+  onWillFocus = async () => {
     // ログイン情報の取得（BaseComponent）
     await this.getLoginInfo()
+
+    this.state.readLastKijiPk = ""
 
     // パラメータを受け取り、どの画面から遷移したかを判断
     const mode = this.props.navigation.getParam("mode")
@@ -83,7 +94,7 @@ export default class ArticleRefer extends BaseComponent {
           if (!isFirst) {
             data = this.state.articleList.concat(data)
           }
-          var readLastKijiPk = -1
+          var readLastKijiPk = ""
           if (json.data.length > 0) {
             readLastKijiPk = json.data[json.data.length - 1].t_kiji_pk
           }
@@ -98,11 +109,11 @@ export default class ArticleRefer extends BaseComponent {
 
   /** 記事投稿画面へ遷移 */
   moveEntry = async (index) => {
-    var selectArticle = null
+    var paramArticle = null
     // 編集の場合は対象リストのindexを指定、新規の場合はindexはnull
     if (index != null) {
       var selItem = this.state.articleList[index]
-      selectArticle = {
+      paramArticle = {
         t_kiji_pk: selItem.t_kiji_pk,
         t_kiji_category_pk: selItem.t_kiji_category_pk,
         t_shain_pk: selItem.t_shain_pk,
@@ -111,14 +122,13 @@ export default class ArticleRefer extends BaseComponent {
         post_dt: selItem.post_dt,
         post_tm: selItem.post_tm,
         file_path: selItem.file_path,
-        hashtag: selItem.hashtag,
-        hashtagStr: selItem.hashtagStr
+        hashtag_str: selItem.hashtag_str,
       }
     }
 
     this.props.navigation.navigate('ArticleEntry', {
       selectCategory: this.state.selectCategory,
-      selectArticle: selectArticle
+      selectArticle: paramArticle
     })
   }
 
@@ -151,7 +161,13 @@ export default class ArticleRefer extends BaseComponent {
     var selectArticle = wkList[index]
     selectArticle.good_flg = selectArticle.good_flg == "0" ? "1" : "0"
     wkList[index] = selectArticle
-    this.setState({ articleList: wkList })
+    this.setState({
+      articleList: wkList,
+      t_kiji_pk: selectArticle.t_kiji_pk,
+      good_flg: selectArticle.good_flg
+    })
+    this.state.t_kiji_pk = selectArticle.t_kiji_pk
+    this.state.good_flg = selectArticle.good_flg
 
     // 記事API.いいね処理の呼び出し（DB登録）
     await fetch(restdomain + '/article/good', {
@@ -177,7 +193,13 @@ export default class ArticleRefer extends BaseComponent {
     var selectArticle = wkList[index]
     selectArticle.favorite_flg = selectArticle.favorite_flg == "0" ? "1" : "0"
     wkList[index] = selectArticle
-    this.setState({ articleList: wkList })
+    this.setState({
+      articleList: wkList,
+      t_kiji_pk: selectArticle.t_kiji_pk,
+      favorite_flg: selectArticle.favorite_flg
+    })
+    this.state.t_kiji_pk = selectArticle.t_kiji_pk
+    this.state.favorite_flg = selectArticle.favorite_flg
 
     // 記事API.お気に入り処理の呼び出し（DB登録）
     await fetch(restdomain + '/article/favorite', {
@@ -222,8 +244,10 @@ export default class ArticleRefer extends BaseComponent {
   /** 検索条件設定ボタン押下 */
   onClickDlgSearchBtn = async () => {
     this.setState({
-      searchDialogVisible: false
+      searchDialogVisible: false,
+      readLastKijiPk: ""
     })
+    this.state.readLastKijiPk = ""
 
     // 記事リスト取得（条件付与）
     this.readArticle(true)
@@ -237,8 +261,12 @@ export default class ArticleRefer extends BaseComponent {
       searchCondYear: "",
       searchCondKeyword: "",
       searchCondHashtag: "",
-      readLastKijiPk: null
+      readLastKijiPk: ""
     })
+    this.state.searchCondYear = ""
+    this.state.searchCondKeyword = ""
+    this.state.searchCondHashtag = ""
+    this.state.readLastKijiPk = ""
 
     // 記事リスト取得
     await this.readArticle(true)
@@ -300,7 +328,7 @@ export default class ArticleRefer extends BaseComponent {
                       {moment(new Date(item.post_dt)).format('YYYY/MM/DD')}
                     </Text>
                     <Text style={styles.dateTimeText}>
-                      {moment(new Date(moment(new Date(item.post_dt)).format('YYYY/MM/DD') + " " + item.post_tm)).format('H:mm')}
+                      {moment(item.post_tm, 'HH:mm:ss').format('H:mm')}
                     </Text>
 
                     {/* 社員画像 */}
@@ -323,7 +351,7 @@ export default class ArticleRefer extends BaseComponent {
                       {/* 自身の投稿記事の場合、編集アイコンを表示する */}
                       <View style={{ flex: 1 }}>
                         {(() => {
-                          if (item.t_shain_pk == this.state.login_shain_pk && this.state.mode === "article") {
+                          if (item.t_shain_pk == this.state.loginShainPk && this.state.mode === "article") {
                             return (
                               <Icon
                                 name="pencil"
@@ -376,7 +404,7 @@ export default class ArticleRefer extends BaseComponent {
 
                     {/* ハッシュタグ */}
                     <Text style={{ fontSize: 12, color: 'blue' }}>
-                      {item.hashtagStr}
+                      {item.hashtag_str}
                     </Text>
                   </View>
                 </View>
@@ -413,14 +441,14 @@ export default class ArticleRefer extends BaseComponent {
             {/* ヘッダ部 */}
             <View style={{ flex: 1 }} />
             <View style={{ flexDirection: 'row' }}>
-              <View style={{ flex: 1, alignItems: 'flex-start' }} />
-
               {/* 検索アイコン */}
-              <Icon name="search" type="font-awesome" color="black"
-                onPress={() => this.onClickDlgSearchBtn()} />
+              <View style={{ marginLeft: 10 }}>
+                <Icon name="search" type="font-awesome" color="black"
+                  onPress={() => this.onClickDlgSearchBtn()} />
+              </View>
 
               {/* 検索クリアアイコン */}
-              <View style={{ flex: 1, alignItems: 'flex-start' }}>
+              <View style={{ flex: 1, alignItems: 'flex-start', marginLeft: 10 }}>
                 <Icon name="search-minus" type="font-awesome" color="black"
                   onPress={() => this.onClickDlgClearBtn()} />
               </View>

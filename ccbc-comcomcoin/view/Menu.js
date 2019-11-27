@@ -23,7 +23,7 @@ export default class MenuPh2 extends Component {
     let loginInfo = {
       userid: "sapporo",
       password: "password",
-      tShainPk: 1,
+      tShainPk: 23,
       imageFileName: "man1.jpg",
       shimei: "札幌　太郎",
       kengenCd: "1",

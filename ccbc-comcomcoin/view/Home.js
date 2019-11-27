@@ -13,6 +13,7 @@ export default class Home extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
+      isLoading: true,
       activeSlide: 0,
       adList: [],
       infoList: [],
@@ -23,6 +24,14 @@ export default class Home extends BaseComponent {
 
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
+    this.props.navigation.addListener(
+      'willFocus', () => this.onWillFocus())
+  }
+
+  /** 画面遷移時処理 */
+  onWillFocus = async () => {
+    this.setState({ isLoading: true })
+
     // ログイン情報の取得（BaseComponent）
     await this.getLoginInfo()
 
@@ -38,6 +47,8 @@ export default class Home extends BaseComponent {
       })
       .then(
         function (json) {
+          this.setState({ isLoading: false })
+
           // 結果が取得できない場合は終了
           if (typeof json.data === 'undefined') {
             return
@@ -71,27 +82,6 @@ export default class Home extends BaseComponent {
     </View>
   )
 
-  get pagination() {
-    return (
-      <Pagination
-        dotsLength={this.state.adList.length}
-        activeDotIndex={this.state.activeSlide}
-        dotStyle={{
-          width: 10,
-          height: 10,
-          borderRadius: 5,
-          marginHorizontal: 8,
-          backgroundColor: 'rgba(200, 200, 200, 0.92)'
-        }}
-        inactiveDotStyle={
-          {}
-        }
-        inactiveDotOpacity={0.4}
-        inactiveDotScale={0.6}
-      />
-    )
-  }
-
   render() {
     return (
       <View style={{ flex: 1 }}>
@@ -101,21 +91,43 @@ export default class Home extends BaseComponent {
 
         {/* -- 広告 -- */}
         <View style={{ flex: 1.0, flexDirection: 'row' }}>
-          <View style={styles.container}>
-            <Carousel
-              data={this.state.adList}
-              layout={'default'}
-              renderItem={this.renderItem.bind(this)}
-              onSnapToItem={index => this.setState({ activeSlide: index })}
-              itemWidth={windowWidth}
-              sliderWidth={windowWidth}
-              containerCustomStyle={styles.carousel}
-              slideStyle={{ flex: 1 }}
-              loop
-              autoplay
-            />
-            <View>{this.pagination}</View>
-          </View>
+          {!this.state.isLoading && (
+            <View style={styles.container}>
+              <Carousel
+                data={this.state.adList}
+                firstItem={1}
+                layout={'default'}
+                renderItem={this.renderItem}
+                onSnapToItem={index => {
+                  this.setState({ activeSlide: index })
+                }}
+                itemWidth={windowWidth}
+                sliderWidth={windowWidth}
+                containerCustomStyle={styles.carousel}
+                slideStyle={{ flex: 1 }}
+                loop={true}
+                autoplay={true}
+              />
+              <View>
+                <Pagination
+                  dotsLength={this.state.adList.length}
+                  activeDotIndex={this.state.activeSlide}
+                  dotStyle={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    marginHorizontal: 8,
+                    backgroundColor: 'rgba(200, 200, 200, 0.92)'
+                  }}
+                  inactiveDotStyle={
+                    {}
+                  }
+                  inactiveDotOpacity={0.4}
+                  inactiveDotScale={0.6}
+                />
+              </View>
+            </View>
+          )}
         </View>
 
         {/* -- お知らせ -- */}
@@ -188,7 +200,7 @@ export default class Home extends BaseComponent {
                     </Text>
                     {/* ハッシュタグ */}
                     <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ color: '#808080', marginTop: -10 }}>
-                      {item.hashtagStr}
+                      {item.hashtag_str}
                     </Text>
                     {/* いいね */}
                     <View style={[{ flexDirection: 'row' }]}>
@@ -198,7 +210,7 @@ export default class Home extends BaseComponent {
                         style={{ width: 25, height: 25 }}
                       />
                       <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 18 }}>
-                        {' '}{item.goodCnt}
+                        {' '}{item.good_cnt}
                       </Text>
                     </View>
                   </Card>
@@ -256,7 +268,7 @@ export default class Home extends BaseComponent {
                     </Text>
                     {/* ハッシュタグ */}
                     <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ color: '#808080', marginTop: -10 }}>
-                      {item.hashtagStr}
+                      {item.hashtag_str}
                     </Text>
                     {/* いいね */}
                     <View style={[{ flexDirection: 'row' }]}>
@@ -266,7 +278,7 @@ export default class Home extends BaseComponent {
                         style={{ width: 25, height: 25 }}
                       />
                       <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 18 }}>
-                        {' '}{item.goodCnt}
+                        {' '}{item.good_cnt}
                       </Text>
                     </View>
                   </Card>

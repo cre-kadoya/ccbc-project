@@ -1,5 +1,6 @@
 import React from 'react'
 import { StyleSheet, Text, View, Image, ScrollView, TextInput, TouchableHighlight, KeyboardAvoidingView } from 'react-native'
+import { Icon } from 'react-native-elements'
 import * as ImagePicker from 'expo-image-picker'
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
@@ -18,21 +19,19 @@ export default class ArticleEntry extends BaseComponent {
     this.state = {
       selectCategory: null,
       selectArticle: null,
-      editArticle: {
-        t_kiji_pk: null,
-        t_kiji_category_pk: null,
-        t_shain_pk: null,
-        title: "",
-        contents: "",
-        post_dt: "",
-        post_tm: "",
-        file_path: "",
-        hashtag: [],
-        hashtagStr: ""
-      },
+      t_kiji_pk: "",
+      t_kiji_category_pk: "",
+      t_shain_pk: "",
+      title: "",
+      contents: "",
+      post_dt: "",
+      post_tm: "",
+      file_path: "",
+      hashtag_str: "",
       imageData: {
         uri: "",
-        type: ""
+        type: "",
+        name: ""
       },
       categoryNm: "",
       confirmDialogVisible: false,
@@ -51,31 +50,32 @@ export default class ArticleEntry extends BaseComponent {
     this.getPermissionAsync()
 
     // 記事照会画面からのパラメータ受け取り
-    const selectCategory = this.props.navigation.getParam("selectCategory")
-    const selectArticle = this.props.navigation.getParam("selectArticle")
-    let editArticle = this.state.editArticle
-    if (selectArticle != null) {
+    const paramCategory = this.props.navigation.getParam("selectCategory")
+    const paramArticle = this.props.navigation.getParam("selectArticle")
+    if (paramArticle !== null) {
       // 編集時
-      editArticle.t_kiji_pk = selectArticle.t_kiji_pk
-      editArticle.t_kiji_category_pk = selectArticle.t_kiji_category_pk
-      editArticle.t_shain_pk = selectArticle.t_shain_pk
-      editArticle.title = selectArticle.title
-      editArticle.contents = selectArticle.contents
-      editArticle.post_dt = selectArticle.post_dt
-      editArticle.post_tm = selectArticle.post_tm
-      editArticle.file_path = selectArticle.file_path
-      editArticle.hashtag = selectArticle.hashtag
-      editArticle.hashtagStr = selectArticle.hashtagStr
+      this.setState({
+        t_kiji_pk: paramArticle.t_kiji_pk,
+        t_kiji_category_pk: paramArticle.t_kiji_category_pk,
+        t_shain_pk: paramArticle.t_shain_pk,
+        title: paramArticle.title,
+        contents: paramArticle.contents,
+        post_dt: paramArticle.post_dt,
+        post_tm: paramArticle.post_tm,
+        file_path: paramArticle.file_path,
+        hashtag_str: paramArticle.hashtag_str.replace(/#/g, ' ')
+      })
     } else {
       // 新規投稿時
-      editArticle.t_kiji_category_pk = selectCategory.t_kiji_category_pk
-      editArticle.t_shain_pk = this.state.login_shain_pk
+      this.setState({
+        t_kiji_category_pk: paramCategory.t_kiji_category_pk,
+        t_shain_pk: this.state.login_shain_pk
+      })
     }
     this.setState({
-      selectCategory: selectCategory,
-      selectArticle: selectArticle,
-      editArticle: editArticle,
-      categoryNm: selectCategory.category_nm
+      selectCategory: paramCategory,
+      selectArticle: paramArticle,
+      categoryNm: paramCategory.category_nm
     })
   }
 
@@ -91,14 +91,14 @@ export default class ArticleEntry extends BaseComponent {
   /** 記事投稿ボタン押下 */
   onClickEntry = async () => {
     // 入力チェック
-    if (this.state.editArticle.title == "") {
+    if (this.state.title == "") {
       this.setState({
         alertDialogVisible: true,
         alertDialogMessage: "タイトルを入力してください"
       })
       return
     }
-    if (this.state.editArticle.contents == "") {
+    if (this.state.contents == "") {
       this.setState({
         alertDialogVisible: true,
         alertDialogMessage: "記事の内容を入力してください"
@@ -119,30 +119,50 @@ export default class ArticleEntry extends BaseComponent {
 
     // APIパラメータ作成
     const data = new FormData()
-    let editItem = this.state.editArticle
+    data.append('db_name', this.state.db_name)
+    data.append('loginShainPk', this.state.loginShainPk)
+
+    // 画像ファイル
     let fileName = ""
     if (this.state.imageData.uri !== "") {
-      // 画像ファイル
       fileName = moment(new Date()).format('YYYYMMDDHHmmssSS') + ".png"
       data.append('imageData', {
         uri: this.state.imageData.uri,
         type: this.state.imageData.type,
         name: fileName
       })
-      editItem.file_path = fileName
+    } else if (this.state.file_path !== "") {
+      fileName = this.state.file_path
     }
-    editItem.post_dt = new Date()
-    editItem.post_tm = new Date()
-    this.setState({
-      editArticle: editItem
-    })
-    data.append('editArticle', this.state.editArticle)
+    data.append('t_kiji_pk', this.state.t_kiji_pk)
+    data.append('t_kiji_category_pk', this.state.t_kiji_category_pk)
+    data.append('t_shain_pk', this.state.t_shain_pk)
+    data.append('title', this.state.title)
+    data.append('contents', this.state.contents)
+    data.append('post_dt', new Date())
+    data.append('post_tm', new Date())
+    data.append('file_path', fileName)
+    data.append('hashtag', this.state.hashtag)
+    data.append('hashtag_str', this.state.hashtag_str)
+    // data.append('editArticle', {
+    //   t_kiji_pk: this.state.t_kiji_pk,
+    //   t_kiji_category_pk: this.state.t_kiji_category_pk,
+    //   t_shain_pk: this.state.t_shain_pk,
+    //   title: this.state.title,
+    //   contents: this.state.contents,
+    //   post_dt: new Date(),
+    //   post_tm: new Date(),
+    //   file_path: fileName,
+    //   hashtag: this.state.hashtag,
+    //   hashtag_str: this.state.hashtag_str
+    // })
 
     // 記事API.投稿処理の呼び出し（DB登録→BC登録）
     await fetch(restdomain + '/article/edit', {
       method: 'POST',
       mode: 'cors',
       body: data,
+      // body: JSON.stringify(this.state),
       headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'multipart/form-data' })
     })
       .then(
@@ -214,14 +234,8 @@ export default class ArticleEntry extends BaseComponent {
                   <Text style={styles.inputTitle}>タイトル</Text>
                   <TextInput
                     style={styles.inputText}
-                    value={this.state.editArticle.title}
-                    onChangeText={text => {
-                      let editItem = this.state.editArticle
-                      editItem.title = text
-                      this.setState({
-                        editArticle: editItem
-                      })
-                    }}
+                    value={this.state.title}
+                    onChangeText={text => { this.setState({ title: text }) }}
                   />
                 </View>
                 <View>
@@ -229,14 +243,8 @@ export default class ArticleEntry extends BaseComponent {
                   <Text style={styles.inputTitle}>タグ（スペース区切り #は不要）</Text>
                   <TextInput
                     style={styles.inputText}
-                    value={this.state.editArticle.hashtagStr.replace(/#/g, ' ')}
-                    onChangeText={text => {
-                      let editItem = this.state.editArticle
-                      editItem.hashtagStr = text
-                      this.setState({
-                        editArticle: editItem
-                      })
-                    }}
+                    value={this.state.hashtag_str}
+                    onChangeText={text => { this.setState({ hashtag_str: text }) }}
                   />
                 </View>
                 <View
@@ -253,40 +261,52 @@ export default class ArticleEntry extends BaseComponent {
                     multiline={true}
                     numberOfLines={8}
                     style={[styles.inputText, { textAlignVertical: 'top' }]}
-                    value={this.state.editArticle.contents}
-                    onChangeText={text => {
-                      let editItem = this.state.editArticle
-                      editItem.contents = text
-                      this.setState({
-                        editArticle: editItem
-                      })
-                    }}
+                    value={this.state.contents}
+                    onChangeText={text => { this.setState({ contents: text }) }}
                   />
                 </View>
                 {/* 画像 */}
-                {(this.state.editArticle.file_path !== "" && this.state.imageData.uri === "") && (
-                  <View style={{ marginTop: 10 }}>
-                    <Image
-                      source={{ uri: restdomain + `/uploads/article/${this.state.editArticle.file_path}` }}
-                      style={{ width: 300, height: 300 }} />
+                <View>
+                  <Text style={styles.inputTitle}>画像</Text>
+                  {(this.state.file_path !== "" && this.state.imageData.uri === "") && (
+                    <View style={{ marginTop: 10 }}>
+                      <Image
+                        source={{ uri: restdomain + `/uploads/article/${this.state.file_path}` }}
+                        style={{ width: 300, height: 300 }} />
+                    </View>
+                  )}
+                  {this.state.imageData.uri !== "" && (
+                    <View>
+                      <Image
+                        source={{ uri: this.state.imageData.uri }}
+                        style={{
+                          width: 250,
+                          height: 250,
+                          marginTop: 30,
+                          marginBottom: 30
+                        }}
+                      />
+                    </View>
+                  )}
+                  <View style={{ flexDirection: 'row', marginTop: 10 }}>
+                    {/* 画像選択ボタン */}
+                    <View style={{ flex: 1, alignItems: 'flex-start', marginLeft: 10 }}>
+                      <TouchableHighlight onPress={() => this.onClickPickImage()}>
+                        <View style={styles.selectButtonView}>
+                          <View style={styles.selectButtonTitleView}>
+                            <Text style={styles.selectButtonTitleText}>画像選択</Text>
+                          </View>
+                        </View>
+                      </TouchableHighlight>
+                    </View>
+                    {/* 画像削除アイコン */}
+                    <View style={{ flex: 1, alignItems: 'flex-end', marginRight: 10 }}>
+                      <Icon name="times-circle" type="font-awesome" color="black"
+                        onPress={() => { this.setState({ imageData: { uri: "" }, file_path: "" }) }}
+                      />
+                    </View>
                   </View>
-                )}
-                <TouchableHighlight onPress={() => this.onClickPickImage()}>
-                  <Text>画像選択</Text>
-                </TouchableHighlight>
-                {this.state.imageData.uri !== "" && (
-                  <View>
-                    <Image
-                      source={{ uri: this.state.imageData.uri }}
-                      style={{
-                        width: 250,
-                        height: 250,
-                        marginTop: 30,
-                        marginBottom: 30
-                      }}
-                    />
-                  </View>
-                )}
+                </View>
               </View>
 
               {/* -- 投稿ボタン -- */}
@@ -343,14 +363,24 @@ const styles = StyleSheet.create({
     color: 'white',
     padding: 10
   },
-  nonReadMark: {
+  selectButtonView: {
+    borderRadius: 20,
+    // alignItems: 'center',
+    // marginTop: 30,
+    // marginLeft: 10,
+    // marginRight: 10,
+    width: 100,
+    backgroundColor: 'lightblue',
+    // flexDirection: 'row'
+  },
+  selectButtonTitleView: {
+    // flex: 1,
+    alignItems: 'center'
+  },
+  selectButtonTitleText: {
+    fontSize: 16,
     color: 'white',
-    backgroundColor: '#FF3333',
-    padding: 0,
-    borderRadius: 40,
-    borderWidth: 0,
-    borderColor: 'white',
-    overflow: 'hidden'
+    padding: 10
   },
   dateTimeText: {
     fontSize: 14,

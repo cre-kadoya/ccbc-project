@@ -12,6 +12,7 @@ export default class HomeInformation extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
+      renban: "",
       title: "",
       comment: "",
       notice_dt: null,

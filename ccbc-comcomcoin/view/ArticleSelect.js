@@ -16,6 +16,12 @@ export default class ArticleSelect extends BaseComponent {
 
   /** コンポーネントのマウント時処理 */
   componentWillMount = async () => {
+    this.props.navigation.addListener(
+      'willFocus', () => this.onWillFocus())
+  }
+
+  /** 画面遷移時処理 */
+  onWillFocus = async () => {
     // ログイン情報の取得（BaseComponent）
     await this.getLoginInfo()
 

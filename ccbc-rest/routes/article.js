@@ -7,6 +7,7 @@ var db2 = require('./common/sequelize_helper.js')
 const bcdomain = require('./common/constans.js').bcdomain
 const jimuAccount = require('./common/constans.js').jimuAccount
 const jimuPassword = require('./common/constans.js').jimuPassword
+const jimuShainPk = require('./common/constans.js').jimuShainPk
 
 var multer = require('multer')
 var storage = multer.diskStorage({
@@ -49,6 +50,7 @@ router.post('/findCategory', (req, res) => {
  */
 router.post('/findArticle', (req, res) => {
   console.log('API : findArticle - start')
+  console.log("req.body:", req.body)
   findArticleList(req, res)
 
   // let idx = 100
@@ -62,7 +64,7 @@ router.post('/findArticle', (req, res) => {
   //     contents: "今年もこの時期がやってまいりました！\n北海道の大自然の中を颯爽と走る事ができるマラソン大会です。\n自然あふれる風景を満喫しながら走りませんか？\nフルマラソンだけでなく、20kmや10kmもありますので、初心者の方も是非どうぞ。\n\n申し込み用のホームページです\nhttps://xxxxxxxxxx.jp/123456789-entry",
   //     post_dt: "2019/07/15", post_tm: "10:57", file_path: "test001.png",
   //     shain_nm: "佐藤　陸", shain_image_path: "",
-  //     hashtagStr: "#スポーツ　#マラソン　",
+  //     hashtag_str: "#スポーツ　#マラソン　",
   //     hashtag: [
   //       { seq_no: 1, hashtag: "スポーツ" },
   //       { seq_no: 2, hashtag: "マラソン" }],
@@ -74,7 +76,7 @@ router.post('/findArticle', (req, res) => {
   //     contents: "どこよりも早く、会社の最寄り駅にてビアガーデンが開催されるようです。\n今年から始まるとの事で、イベントも盛り沢山みたいですね。\n\nURLを貼っておきますので、是非見てください。\nhttps://xxxxxxxxxx-xxxxx.jp\nちなみに私は来週の金曜日にチームメンバーと繰り出そうと思っています！",
   //     post_dt: "2019/07/02", post_tm: "19:09", file_path: "",
   //     shain_nm: "佐々木　澪", shain_image_path: "",
-  //     hashtagStr: "#飲み会　#お店　",
+  //     hashtag_str: "#飲み会　#お店　",
   //     hashtag: [
   //       { seq_no: 3, hashtag: "飲み会" },
   //       { seq_no: 4, hashtag: "お店" }],
@@ -86,7 +88,7 @@ router.post('/findArticle', (req, res) => {
   //     contents: "どこよりも早く、会社の最寄り駅にてビアガーデンが開催されるようです。2",
   //     post_dt: "2019/07/02", post_tm: "9:35", file_path: "",
   //     shain_nm: "佐々木　澪", shain_image_path: "",
-  //     hashtagStr: "#飲み会　#お店　#お店　#お店　",
+  //     hashtag_str: "#飲み会　#お店　#お店　#お店　",
   //     hashtag: [
   //       { seq_no: 3, hashtag: "飲み会" },
   //       { seq_no: 4, hashtag: "お店" }],
@@ -98,7 +100,7 @@ router.post('/findArticle', (req, res) => {
   //     contents: "どこよりも早く、会社の最寄り駅にてビアガーデンが開催されるようです。3",
   //     post_dt: "2019/07/02", post_tm: "7:05", file_path: "",
   //     shain_nm: "佐々木　澪", shain_image_path: "",
-  //     hashtagStr: "#飲み会　#お店　",
+  //     hashtag_str: "#飲み会　#お店　",
   //     hashtag: [
   //       { seq_no: 3, hashtag: "飲み会" },
   //       { seq_no: 4, hashtag: "お店" }],
@@ -125,13 +127,11 @@ router.post('/findArticle', (req, res) => {
  */
 router.post('/edit', upload.fields([{ name: 'imageData' }]), (req, res) => {
   console.log('API : edit - start')
-  console.log("jimuAccount:", jimuAccount)
-  console.log("jimuPassword:", jimuPassword)
-  
-  edit(req, res)
+  // console.log("jimuAccount:", jimuAccount)
+  // console.log("jimuPassword:", jimuPassword)
   console.log('API : edit - req.body : ' + JSON.stringify(req.body))
-  console.log('API : edit - req.body.editArticle.file_path : ' + req.body.editArticle.file_path)
-  res.json({ status: true })
+
+  edit(req, res)
   console.log('API : edit - end')
 })
 
@@ -141,7 +141,7 @@ router.post('/edit', upload.fields([{ name: 'imageData' }]), (req, res) => {
  */
 router.post('/good', (req, res) => {
   console.log('API : good - start')
-  // good(req, res)
+  good(req, res)
   console.log('API : good - end')
 })
 
@@ -151,7 +151,7 @@ router.post('/good', (req, res) => {
  */
 router.post('/favorite', (req, res) => {
   console.log('API : favorite - start')
-  // favorite(req, res)
+  favorite(req, res)
   console.log('API : favorite - end')
 })
 
@@ -186,13 +186,14 @@ async function findArticleList(req, res) {
     status: true,
     data: resdatas
   })
-  
+
   // 記事既読の更新
   if (resdatas.length > 0) {
-    const kijiPk = resdatas[resdatas.length - 1].t_kiji_pk
+    const kijiPk = resdatas[0].t_kiji_pk
+    const kijiCategoryPk = resdatas[0].t_kiji_category_pk
     db.transaction(async function (tx) {
       // DB更新
-      await insertOrUpdateKijiKidoku(db, tx, req, kijiPk)
+      await insertOrUpdateKijiKidoku(db, tx, req, kijiPk, kijiCategoryPk)
     })
       .then(result => {
         // コミットしたらこっち
@@ -218,26 +219,38 @@ async function edit(req, res) {
   db.transaction(async function (tx) {
     // 記事テーブルの更新
     let isInsert = true
-    if (req.body.editArticle.t_kiji_pk != null && req.body.editArticle.t_kiji_pk != "") {
+    if (req.body.t_kiji_pk !== null && req.body.t_kiji_pk !== "") {
       isInsert = false
     }
-    await insertOrUpdateKiji(db, tx, req, isInsert)
+    var ret = await insertOrUpdateKiji(db, tx, req, isInsert)
+    var kijiPk = req.body.t_kiji_pk
+    if (isInsert) {
+      kijiPk = ret[0].t_kiji_pk
+    }
 
     // 記事ハッシュタグテーブルの更新（delete and insert）
-    await deleteKijiHashtag(db, tx, req)
-    var hashtag = req.body.editArticle.hashtagStr.split("　")
-    for (var i in hashtag) {
-      var kijiHashtag = {
-        t_kiji_pk: req.body.editArticle.t_kiji_pk,
-        seq_no: i,
-        t_kiji_category_pk: req.body.editArticle.t_kiji_category_pk,
-        hashtag: hashtag[i]
+    if (!isInsert) {
+      await deleteKijiHashtag(db, tx, req)
+    }
+    if (req.body.hashtag_str !== "") {
+      var hashtag = req.body.hashtag_str.replace("　", " ").split(" ")
+      var seq = 0
+      for (var i in hashtag) {
+        if (hashtag[i] !== "") {
+          var kijiHashtag = {
+            t_kiji_pk: req.body.t_kiji_pk,
+            seq_no: seq++,
+            t_kiji_category_pk: req.body.t_kiji_category_pk,
+            hashtag: hashtag[i]
+          }
+          await insertKijiHashtag(db, tx, req, kijiPk, kijiHashtag)
+        }
       }
-      await insertKijiHashtag(db, tx, req, kijiHashtag)
     }
 
     // BCへの書き込み
     // const transactionId = await bcrequest(req)
+    const transactionId = ""
 
     // 贈与テーブルの追加
     if (isInsert) {
@@ -315,17 +328,17 @@ function selectKijiCategory(db, req) {
   return new Promise((resolve, reject) => {
     // 記事カテゴリテーブルの情報と、記事の未読件数（記事既読テーブルに登録されているIDより新しいIDの件数）を一緒に取得
     var sql =
-      "select cat.t_kiji_category_pk, cat.category_nm, coalesce(sub.midoku_cnt, 0) as midoku_cnt" +
+      "select cat.t_kiji_category_pk, cat.category_nm, count(kij.t_kiji_pk) AS midoku_cnt" +
       " from t_kiji_category cat" +
-      " left join" +
-      "  (select count(*) as midoku_cnt, kij.t_kiji_category_pk" +
-      "   from t_kiji kij left join t_kiji_kidoku kid on kij.t_kiji_category_pk = kid.t_kiji_category_pk" +
-      "   where kid.t_shain_pk = :shain_pk" +
-      "   and kij.delete_flg = '0'" +
-      "   and kij.t_kiji_pk > kid.t_kiji_pk" +
-      "   group by kij.t_kiji_category_pk) sub" +
-      "  on cat.t_kiji_category_pk = sub.t_kiji_category_pk" +
+      " left join t_kiji_kidoku kid" +
+      " on cat.t_kiji_category_pk = kid.t_kiji_category_pk" +
+      " and kid.t_shain_pk = :shain_pk" +
+      " left join t_kiji kij " +
+      " on cat.t_kiji_category_pk = kij.t_kiji_category_pk" +
+      " and kij.delete_flg = '0'" +
+      " and kij.t_kiji_pk > coalesce(kid.t_kiji_pk, -1)" +
       " where cat.delete_flg = '0'" +
+      " group by cat.t_kiji_category_pk, cat.category_nm" +
       " order by cat.t_kiji_category_pk"
     db.query(sql, {
       replacements: { shain_pk: req.body.loginShainPk },
@@ -353,31 +366,32 @@ function selectKijiWithCond(db, req) {
     var sqlcond_dt_to = ""
     var sqlcond_hashtag = ""
     var sqlcond_keyword = ""
-    if (req.body.current_kiji_category_pk != null) {
+    if (req.body.current_kiji_category_pk !== null && req.body.current_kiji_category_pk !== "") {
       sqlcond_kiji_category_pk = " and kij.t_kiji_category_pk = :t_kiji_category_pk"
     }
-    if (req.body.searchCondKijiPk != null) {
+    if (req.body.searchCondKijiPk !== null && req.body.searchCondKijiPk !== "") {
       sqlcond_kiji_pk = " and kij.t_kiji_pk = :t_kiji_pk"
-    } else if (req.body.readLastKijiPk != null) {
+    } else if (req.body.readLastKijiPk !== null && req.body.readLastKijiPk !== "") {
       sqlcond_kiji_pk = " and kij.t_kiji_pk < :t_kiji_pk_read_last"
     }
-    if (req.body.searchCondYear != null && req.body.searchCondYear != '') {
+    if (req.body.searchCondYear !== null && req.body.searchCondYear !== '') {
       sqlcond_dt_from = " and kij.post_dt >= :dt_from"
       sqlcond_dt_to = " and kij.post_dt <= :dt_to"
     }
-    if (req.body.searchCondHashtag != null && req.body.searchCondHashtag != '') {
+    if (req.body.searchCondHashtag !== null && req.body.searchCondHashtag !== '') {
       sqlcond_hashtag = " and exists (select * from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk and has.hashtag like :hashtag)"
     }
-    if (req.body.searchCondKeyword != null && req.body.searchCondKeyword != '') {
-      sqlcond_keyword = " and (kij.title like :keyword or kij.contents like : keyword)"
+    if (req.body.searchCondKeyword !== null && req.body.searchCondKeyword !== '') {
+      sqlcond_keyword = " and (kij.title like :keyword or kij.contents like :keyword)"
     }
 
     // 記事情報テーブルより条件を絞り込んで取得
     var sql =
       "select kij.t_kiji_pk, kij.t_kiji_category_pk, kij.t_shain_pk, kij.title, kij.contents, kij.post_dt, kij.post_tm, kij.file_path," +
       " sha.shimei as shain_nm, sha.image_file_nm as shain_image_path," +
-      " coalesce(goo.t_kiji_pk, '1', '0') as good_flg, coalesce(fav.t_kiji_pk, '1', '0') as favorite_flg," +
-      " array_to_string(array(select '#' || hashtag from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk order by has.seq_no), '　') as hashtagStr," +
+      " case when goo.t_kiji_pk is null then '0' else '1' end as good_flg," +
+      " case when fav.t_kiji_pk is null then '0' else '1' end as favorite_flg," +
+      " array_to_string(array(select '#' || hashtag from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk order by has.seq_no), '　') as hashtag_str," +
       " cat.category_nm" +
       " from t_kiji kij" +
       " inner join t_kiji_category cat on kij.t_kiji_category_pk = cat.t_kiji_category_pk" +
@@ -398,7 +412,7 @@ function selectKijiWithCond(db, req) {
       replacements: {
         t_kiji_category_pk: req.body.current_kiji_category_pk,
         t_shain_pk: req.body.loginShainPk,
-        t_kiji_pk: req.body.t_kiji_pk,
+        t_kiji_pk: req.body.searchCondKijiPk,
         t_kiji_pk_read_last: req.body.readLastKijiPk,
         dt_from: req.body.searchCondYear + "/01/01",
         dt_to: req.body.searchCondYear + "/12/31",
@@ -427,12 +441,13 @@ function insertOrUpdateKiji(db, tx, req, isInsert) {
     var sql = ""
     if (isInsert) {
       sql =
-        "insert into t_kiji (t_kiji_category_pk, t_shain_pk, title, contents, hashtag, post_dt, post_tm, t_coin_ido_pk, file_path, delete_flg, insert_user_id, insert_tm, update_user_id, update_tm) " +
-        " values (:t_kiji_category_pk, :t_shain_pk, :title, :contents, :hashtag, current_timestamp, current_timestamp, :t_coin_ido_pk, :file_path, '0', :user_id, current_timestamp, :user_id, current_timestamp) "
+        "insert into t_kiji (t_kiji_category_pk, t_shain_pk, title, contents, post_dt, post_tm, t_coin_ido_pk, file_path, delete_flg, insert_user_id, insert_tm, update_user_id, update_tm) " +
+        " values (:t_kiji_category_pk, :t_shain_pk, :title, :contents, current_timestamp, current_timestamp, :t_coin_ido_pk, :file_path, '0', :user_id, current_timestamp, :user_id, current_timestamp) " +
+        " returning t_kiji_pk"
     } else {
       sql =
         "update t_kiji set " +
-        " title = :title, contents = :contents, hashtag = :hashtag, file_path = :file_path," +
+        " title = :title, contents = :contents, file_path = :file_path," +
         " update_user_id = :user_id, update_tm = current_timestamp" +
         " where t_kiji_pk = :t_kiji_pk"
     }
@@ -440,14 +455,14 @@ function insertOrUpdateKiji(db, tx, req, isInsert) {
     db.query(sql, {
       transaction: tx,
       replacements: {
-        t_kiji_pk: req.body.editArticle.t_kiji_pk,
-        t_kiji_category_pk: req.body.editArticle.t_kiji_category_pk,
+        t_kiji_pk: req.body.t_kiji_pk,
+        t_kiji_category_pk: req.body.t_kiji_category_pk,
         t_shain_pk: req.body.loginShainPk,
-        title: req.body.editArticle.title,
-        contents: req.body.editArticle.contents,
-        hashtag: req.body.editArticle.hashtag,
+        title: req.body.title,
+        contents: req.body.contents,
+        hashtag: req.body.hashtag,
         t_coin_ido_pk: null,
-        file_path: req.body.editArticle.file_path,
+        file_path: req.body.file_path,
         user_id: req.body.loginShainPk
       }
     })
@@ -468,14 +483,14 @@ function insertZoyo(db, tx, req, transactionId) {
   return new Promise((resolve, reject) => {
 
     var sql =
-      "iinsert into t_zoyo (zoyo_moto_shain_pk, zoyo_saki_shain_pk, transaction_id, zoyo_comment, nenji_flg, delete_flg, insert_user_id, insert_tm) " +
+      "insert into t_zoyo (zoyo_moto_shain_pk, zoyo_saki_shain_pk, transaction_id, zoyo_comment, nenji_flg, delete_flg, insert_user_id, insert_tm) " +
       " values (:zoyo_moto_shain_pk, :zoyo_saki_shain_pk, :transaction_id, :zoyo_comment, :nenji_flg, '0', :insert_user_id, current_timestamp) "
 
     db.query(sql, {
       transaction: tx,
       replacements: {
         zoyo_moto_shain_pk: req.body.loginShainPk,
-        zoyo_saki_shain_pk: jimuAccount,
+        zoyo_saki_shain_pk: jimuShainPk,
         transaction_id: transactionId,
         zoyo_comment: "記事投稿",
         nenji_flg: "1",
@@ -502,7 +517,7 @@ function deleteKijiHashtag(db, tx, req) {
     db.query(sql, {
       transaction: tx,
       replacements: {
-        t_kiji_pk: req.body.editArticle.t_kiji_pk
+        t_kiji_pk: req.body.t_kiji_pk
       }
     })
       .spread((datas, metadata) => {
@@ -515,9 +530,10 @@ function deleteKijiHashtag(db, tx, req) {
  * @param db SequelizeされたDBインスタンス
  * @param tx トランザクション
  * @param req リクエスト
+ * @param kijiPk 記事テーブルPK
  * @param tKijiHashtag 記事ハッシュタグテーブル情報
  */
-function insertKijiHashtag(db, tx, req, tKijiHashtag) {
+function insertKijiHashtag(db, tx, req, kijiPk, tKijiHashtag) {
   return new Promise((resolve, reject) => {
     var sql =
       "insert into t_kiji_hashtag (t_kiji_pk, seq_no, t_kiji_category_pk, hashtag, insert_user_id, insert_tm, update_user_id, update_tm) " +
@@ -526,7 +542,7 @@ function insertKijiHashtag(db, tx, req, tKijiHashtag) {
     db.query(sql, {
       transaction: tx,
       replacements: {
-        t_kiji_pk: tKijiHashtag.t_kiji_pk,
+        t_kiji_pk: kijiPk,
         seq_no: tKijiHashtag.seq_no,
         t_kiji_category_pk: tKijiHashtag.t_kiji_category_pk,
         hashtag: tKijiHashtag.hashtag,
@@ -548,7 +564,7 @@ function insertKijiHashtag(db, tx, req, tKijiHashtag) {
 function insertOrUpdateGood(db, tx, req) {
   return new Promise((resolve, reject) => {
     var sql = ""
-    if (req.body.editArticle.good_flg = "1") {
+    if (req.body.good_flg === "1") {
       sql =
         "insert into t_good (t_kiji_pk, t_shain_pk, insert_user_id, insert_tm, update_user_id, update_tm) " +
         " values (:t_kiji_pk, :t_shain_pk, :user_id, current_timestamp, :user_id, current_timestamp) " +
@@ -561,7 +577,7 @@ function insertOrUpdateGood(db, tx, req) {
     db.query(sql, {
       transaction: tx,
       replacements: {
-        t_kiji_pk: req.body.editArticle.t_kiji_pk,
+        t_kiji_pk: req.body.t_kiji_pk,
         t_shain_pk: req.body.loginShainPk,
         user_id: req.body.loginShainPk
       }
@@ -581,7 +597,7 @@ function insertOrUpdateGood(db, tx, req) {
 function insertOrUpdateFavorite(db, tx, req) {
   return new Promise((resolve, reject) => {
     var sql = ""
-    if (req.body.editArticle.favorite_flg = "1") {
+    if (req.body.favorite_flg === "1") {
       sql =
         "insert into t_favorite (t_kiji_pk, t_shain_pk, insert_user_id, insert_tm, update_user_id, update_tm) " +
         " values (:t_kiji_pk, :t_shain_pk, :user_id, current_timestamp, :user_id, current_timestamp) " +
@@ -594,7 +610,7 @@ function insertOrUpdateFavorite(db, tx, req) {
     db.query(sql, {
       transaction: tx,
       replacements: {
-        t_kiji_pk: req.body.editArticle.t_kiji_pk,
+        t_kiji_pk: req.body.t_kiji_pk,
         t_shain_pk: req.body.loginShainPk,
         user_id: req.body.loginShainPk
       }
@@ -611,8 +627,9 @@ function insertOrUpdateFavorite(db, tx, req) {
  * @param tx トランザクション
  * @param req リクエスト
  * @param kijiPk 記事テーブルPK
+ * @param kijiCategoryPk 記事カテゴリーテーブルPK
  */
-function insertOrUpdateKijiKidoku(db, tx, req, kijiPk) {
+function insertOrUpdateKijiKidoku(db, tx, req, kijiPk, kijiCategoryPk) {
   return new Promise((resolve, reject) => {
     var sql =
       "insert into t_kiji_kidoku (t_shain_pk, t_kiji_category_pk, t_kiji_pk, insert_user_id, insert_tm, update_user_id, update_tm) " +
@@ -625,7 +642,7 @@ function insertOrUpdateKijiKidoku(db, tx, req, kijiPk) {
       transaction: tx,
       replacements: {
         t_shain_pk: req.body.loginShainPk,
-        t_kiji_category_pk: req.body.current_kiji_category_pk,
+        t_kiji_category_pk: kijiCategoryPk,
         t_kiji_pk: kijiPk,
         user_id: req.body.loginShainPk
       }

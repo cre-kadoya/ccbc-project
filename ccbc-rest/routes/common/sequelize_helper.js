@@ -35,7 +35,7 @@ exports.sequelizeDB = function(req) {
   if (req.body.db_name != null && req.body.db_name != '') {
     db = this.sequelize3(req.body.db_name)
   } else {
-    db = sequelize
+    db = this.sequelize
   }
   return db
 }

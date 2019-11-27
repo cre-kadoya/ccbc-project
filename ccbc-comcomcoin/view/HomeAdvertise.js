@@ -10,8 +10,9 @@ export default class HomeAdvertise extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
+      renban: "",
       file_path: "",
-      comment: "",
+      comment: ""
     }
   }
 
@@ -19,7 +20,11 @@ export default class HomeAdvertise extends BaseComponent {
   componentWillMount = async () => {
     // ログイン情報の取得（BaseComponent）
     await this.getLoginInfo()
-    
+
+    // 引き継ぎパラメータの取得
+    const renban = this.props.navigation.getParam("renban")
+    this.state.renban = renban
+
     // ホームAPI.ComComCoinホーム広告情報取得処理の呼び出し
     await fetch(restdomain + '/comcomcoin_home/findHomeAdvertise', {
       method: 'POST',
