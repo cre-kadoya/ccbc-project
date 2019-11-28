@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, Text, View, Image, ScrollView, Modal, TextInput, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Image, ScrollView, Modal, TextInput, TouchableOpacity, RefreshControl } from 'react-native'
 import { Icon, Avatar, Card } from 'react-native-elements'
 import moment from 'moment'
 import 'moment/locale/ja'
@@ -24,6 +24,7 @@ export default class ArticleRefer extends BaseComponent {
       t_kiji_pk: "",
       favorite_flg: "0",
       good_flg: "0",
+      refreshing: false,
       searchDialogVisible: false,
       searchCondKijiPk: "",
       searchCondYear: "",
@@ -94,7 +95,7 @@ export default class ArticleRefer extends BaseComponent {
           if (!isFirst) {
             data = this.state.articleList.concat(data)
           }
-          var readLastKijiPk = ""
+          var readLastKijiPk = this.state.readLastKijiPk
           if (json.data.length > 0) {
             readLastKijiPk = json.data[json.data.length - 1].t_kiji_pk
           }
@@ -127,6 +128,7 @@ export default class ArticleRefer extends BaseComponent {
     }
 
     this.props.navigation.navigate('ArticleEntry', {
+      mode: this.state.mode,
       selectCategory: this.state.selectCategory,
       selectArticle: paramArticle
     })
@@ -237,6 +239,20 @@ export default class ArticleRefer extends BaseComponent {
     this.readArticle(false)
   }
 
+  /** スクロールのリフレッシュ（ページを引っ張った操作） */
+  onRefresh = async () => {
+    this.setState({
+      refreshing: true,
+      readLastKijiPk: ""
+    })
+    this.state.readLastKijiPk = ""
+
+    // 記事リスト取得（再表示）
+    await this.readArticle(true)
+
+    this.setState({ refreshing: false })
+  }
+
   /**
    * 検索ダイアログ画面のイベント
    */
@@ -314,7 +330,12 @@ export default class ArticleRefer extends BaseComponent {
         </View>
 
         <ScrollView
-          onMomentumScrollEnd={this.reachScrollBottom.bind(this)}>
+          onMomentumScrollEnd={this.reachScrollBottom.bind(this)}
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this.onRefresh} />
+          }>
 
           {/* -- 記事表示（繰り返し） -- */}
           {this.state.articleList.map((item, i) => {
@@ -351,7 +372,7 @@ export default class ArticleRefer extends BaseComponent {
                       {/* 自身の投稿記事の場合、編集アイコンを表示する */}
                       <View style={{ flex: 1 }}>
                         {(() => {
-                          if (item.t_shain_pk == this.state.loginShainPk && this.state.mode === "article") {
+                          if (item.t_shain_pk == this.state.loginShainPk) {
                             return (
                               <Icon
                                 name="pencil"
@@ -403,7 +424,7 @@ export default class ArticleRefer extends BaseComponent {
                     </Text>
 
                     {/* ハッシュタグ */}
-                    <Text style={{ fontSize: 12, color: 'blue' }}>
+                    <Text style={{ fontSize: 12, color: 'gray' }}>
                       {item.hashtag_str}
                     </Text>
                   </View>
@@ -418,7 +439,7 @@ export default class ArticleRefer extends BaseComponent {
 
                 {/* 画像 */}
                 <View style={{ marginTop: 10, marginBottom: 10 }}>
-                  {item.file_path !== "" &&
+                  {(item.file_path !== "" && item.file_path !== null) &&
                     <Image
                       source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
                       style={{ width: 300, height: 300 }} />
@@ -478,7 +499,7 @@ export default class ArticleRefer extends BaseComponent {
 
                 {/* 検索キーワード */}
                 <View>
-                  <Text style={styles.inputTitle}>検索キーワード</Text>
+                  <Text style={styles.inputTitle}>検索キーワード ※</Text>
                   <TextInput
                     style={styles.inputText}
                     value={this.state.searchCondKeyword}
@@ -488,7 +509,7 @@ export default class ArticleRefer extends BaseComponent {
 
                 {/* タグ */}
                 <View>
-                  <Text style={styles.inputTitle}>タグ</Text>
+                  <Text style={styles.inputTitle}>タグ ※</Text>
                   <TextInput
                     style={styles.inputText}
                     value={this.state.searchCondHashtag}

@@ -13,7 +13,6 @@ export default class Home extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
-      isLoading: true,
       activeSlide: 0,
       adList: [],
       infoList: [],
@@ -30,8 +29,6 @@ export default class Home extends BaseComponent {
 
   /** 画面遷移時処理 */
   onWillFocus = async () => {
-    this.setState({ isLoading: true })
-
     // ログイン情報の取得（BaseComponent）
     await this.getLoginInfo()
 
@@ -47,8 +44,6 @@ export default class Home extends BaseComponent {
       })
       .then(
         function (json) {
-          this.setState({ isLoading: false })
-
           // 結果が取得できない場合は終了
           if (typeof json.data === 'undefined') {
             return
@@ -85,49 +80,47 @@ export default class Home extends BaseComponent {
   render() {
     return (
       <View style={{ flex: 1 }}>
-        <View style={[{ flex: 0.1 }]}>
+        <View style={[{ flex: 0.2 }]}>
           <Text />
         </View>
 
         {/* -- 広告 -- */}
         <View style={{ flex: 1.0, flexDirection: 'row' }}>
-          {!this.state.isLoading && (
-            <View style={styles.container}>
-              <Carousel
-                data={this.state.adList}
-                firstItem={1}
-                layout={'default'}
-                renderItem={this.renderItem}
-                onSnapToItem={index => {
-                  this.setState({ activeSlide: index })
+          <View style={styles.container}>
+            <Carousel
+              data={this.state.adList}
+              firstItem={0}
+              layout={'default'}
+              renderItem={this.renderItem}
+              onSnapToItem={index => {
+                this.setState({ activeSlide: index })
+              }}
+              itemWidth={windowWidth}
+              sliderWidth={windowWidth}
+              containerCustomStyle={styles.carousel}
+              slideStyle={{ flex: 1 }}
+              loop={true}
+              autoplay={true}
+            />
+            <View>
+              <Pagination
+                dotsLength={this.state.adList.length}
+                activeDotIndex={this.state.activeSlide}
+                dotStyle={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: 5,
+                  marginHorizontal: 8,
+                  backgroundColor: 'rgba(200, 200, 200, 0.92)'
                 }}
-                itemWidth={windowWidth}
-                sliderWidth={windowWidth}
-                containerCustomStyle={styles.carousel}
-                slideStyle={{ flex: 1 }}
-                loop={true}
-                autoplay={true}
+                inactiveDotStyle={
+                  {}
+                }
+                inactiveDotOpacity={0.4}
+                inactiveDotScale={0.6}
               />
-              <View>
-                <Pagination
-                  dotsLength={this.state.adList.length}
-                  activeDotIndex={this.state.activeSlide}
-                  dotStyle={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    marginHorizontal: 8,
-                    backgroundColor: 'rgba(200, 200, 200, 0.92)'
-                  }}
-                  inactiveDotStyle={
-                    {}
-                  }
-                  inactiveDotOpacity={0.4}
-                  inactiveDotScale={0.6}
-                />
-              </View>
             </View>
-          )}
+          </View>
         </View>
 
         {/* -- お知らせ -- */}
@@ -136,7 +129,7 @@ export default class Home extends BaseComponent {
           <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
             {' '}お知らせ
           </Text>
-          <Text style={{ color: 'white', fontSize: 16, position: 'absolute', right: 0 }}
+          <Text style={{ color: 'white', fontSize: 14, position: 'absolute', right: 0 }}
             onPress={() => this.props.navigation.navigate('HomeInfoList')} >
             もっと見る>
           </Text>
@@ -158,7 +151,7 @@ export default class Home extends BaseComponent {
           <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
             {' '}最新の記事
           </Text>
-          <Text style={{ color: 'white', fontSize: 16, position: 'absolute', right: 0 }}
+          <Text style={{ color: 'white', fontSize: 14, position: 'absolute', right: 0 }}
             onPress={() => this.props.navigation.navigate('HomeArticleList', {
               mode: "new"
             })}>
@@ -180,37 +173,37 @@ export default class Home extends BaseComponent {
                   <Card containerStyle={{ height: 120, width: 150 }}>
                     {/* 画像 */}
                     <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
-                      {item.file_path !== "" &&
+                      {(item.file_path !== "" && item.file_path !== null) &&
                         <Image
                           source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
-                          style={{ width: 60, height: 60 }}
+                          style={{ width: 70, height: 70 }}
                         />
                       }
                       {/* 画像が未登録の場合はNo-Imageを表示 */}
-                      {item.file_path === "" &&
+                      {(item.file_path === "" || item.file_path === null) &&
                         <Image
                           source={require('./../images/icon-noimage.png')}
-                          style={{ width: 60, height: 60 }}
+                          style={{ width: 70, height: 70 }}
                         />
                       }
                     </View>
                     {/* タイトル */}
-                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginBottom: 10 }}>
+                    <Text ellipsizeMode={"tail"} numberOfLines={2} style={{ fontSize: 10, marginBottom: 10 }}>
                       {item.title}
                     </Text>
                     {/* ハッシュタグ */}
-                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ color: '#808080', marginTop: -10 }}>
+                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ fontSize: 10, color: 'gray', marginTop: -10 }}>
                       {item.hashtag_str}
                     </Text>
                     {/* いいね */}
                     <View style={[{ flexDirection: 'row' }]}>
-                      <Image
+                      {/* <Image
                         resizeMode="contain"
                         source={require('./../images/good-on.png')}
                         style={{ width: 25, height: 25 }}
-                      />
-                      <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 18 }}>
-                        {' '}{item.good_cnt}
+                      /> */}
+                      <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 12 }}>
+                        {'♡ '}{item.good_cnt}
                       </Text>
                     </View>
                   </Card>
@@ -226,7 +219,7 @@ export default class Home extends BaseComponent {
           <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
             {' '}人気の記事
           </Text>
-          <Text style={{ color: 'white', fontSize: 16, position: 'absolute', right: 0 }}
+          <Text style={{ color: 'white', fontSize: 14, position: 'absolute', right: 0 }}
             onPress={() => this.props.navigation.navigate('HomeArticleList', {
               mode: "popular"
             })}>
@@ -248,37 +241,37 @@ export default class Home extends BaseComponent {
                   <Card containerStyle={{ height: 120, width: 150 }}>
                     {/* 画像 */}
                     <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
-                      {item.file_path !== "" &&
+                      {(item.file_path !== "" && item.file_path !== null) &&
                         <Image
                           source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
-                          style={{ width: 60, height: 60 }}
+                          style={{ width: 70, height: 70 }}
                         />
                       }
                       {/* 画像が未登録の場合はNo-Imageを表示 */}
-                      {item.file_path === "" &&
+                      {(item.file_path === "" || item.file_path === null) &&
                         <Image
                           source={require('./../images/icon-noimage.png')}
-                          style={{ width: 60, height: 60 }}
+                          style={{ width: 70, height: 70 }}
                         />
                       }
                     </View>
                     {/* タイトル */}
-                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginBottom: 10 }}>
+                    <Text ellipsizeMode={"tail"} numberOfLines={2} style={{ fontSize: 10, marginBottom: 10 }}>
                       {item.title}
                     </Text>
                     {/* ハッシュタグ */}
-                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ color: '#808080', marginTop: -10 }}>
+                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ fontSize: 10, color: 'gray', marginTop: -10 }}>
                       {item.hashtag_str}
                     </Text>
                     {/* いいね */}
                     <View style={[{ flexDirection: 'row' }]}>
-                      <Image
+                      {/* <Image
                         resizeMode="contain"
                         source={require('./../images/good-on.png')}
                         style={{ width: 25, height: 25 }}
-                      />
-                      <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 18 }}>
-                        {' '}{item.good_cnt}
+                      /> */}
+                      <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 12 }}>
+                        {'♡ '}{item.good_cnt}
                       </Text>
                     </View>
                   </Card>
@@ -289,7 +282,7 @@ export default class Home extends BaseComponent {
         </View>
 
         {/* -- 各機能アイコン -- */}
-        <View style={[{ flex: 0.3, flexDirection: 'row' }]}>
+        <View style={[{ flex: 0.4, flexDirection: 'row' }]}>
           <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <Image
               resizeMode="contain"

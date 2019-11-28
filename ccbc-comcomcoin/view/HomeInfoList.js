@@ -60,8 +60,9 @@ export default class HomeInfoList extends BaseComponent {
                 return (
                   <ListItem
                     key={i}
-                    titleStyle={{ fontSize: 16 }}
+                    titleStyle={{ fontSize: 12 }}
                     title={item.title}
+                    subtitleStyle={{ fontSize: 10 }}
                     subtitle={moment(new Date(item.notice_dt)).format('YYYY/MM/DD')}
                     onPress={() => this.props.navigation.navigate('HomeInformation', {
                       renban: item.renban

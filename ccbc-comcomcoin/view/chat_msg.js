@@ -5,11 +5,11 @@ import {
   Image,
   AsyncStorage,
   Text,
-  ScrollView
+  ScrollView,
+  TouchableHighlight
 } from 'react-native'
 import {
   Header,
-  Button,
   Icon,
   Avatar,
   Card,
@@ -17,39 +17,156 @@ import {
   FormInput,
   Divider
 } from 'react-native-elements'
-import { Table } from 'react-native-table-component'
+import { GiftedChat } from 'react-native-gifted-chat'
 
-export default class ChatCoinForm extends Component {
-  state = {
-    open: false,
-    open2: false,
-    anchor: 'left',
-    activeStep1: {},
-    activeStep2: {},
-    activeStep3: {},
-    activeStep4: {},
-    activeStep5: {},
-    completed: {},
-    comment: {},
-    coin: 0,
-    tohyoCoin: 0,
-    headList: [],
-    resultList: [],
-    userid: null,
-    password: null,
-    tShainPk: 0,
-    imageFileName: null,
-    shimei: null,
-    kengenCd: null,
-    configCoin: 0,
-    text: ''
-  }
+const restdomain = require('./common/constans.js').restdomain
+
+export default class ChatMsgForm extends Component {
   constructor(props) {
     super(props)
-    this.state = {}
+    this.state = {
+      anchor: 'left',
+      completed: {},
+      comment: {},
+      coin: 0,
+      headList: [],
+      resultList: [],
+      userid: null,
+      password: null,
+      tShainPk: 0,
+      imageFileName: null,
+      shimei: null,
+      kengenCd: null,
+      configCoin: 0,
+      text: '',
+      fromShainPk: 0,
+      chatUser: null,
+      messages: [],
+      message: [],
+      kidokuPk: 0
+    }
   }
   /** コンポーネントのマウント時処理 */
-  async componentWillMount() {}
+  async componentWillMount() {
+    // var loginInfo = await this.getLoginInfo()
+    // this.setState({ userid: loginInfo['userid'] })
+    // this.setState({ password: loginInfo['password'] })
+    // this.setState({ tShainPk: loginInfo['tShainPk'] })
+    // this.state.tShainPk = Number(loginInfo['tShainPk'])
+    // this.setState({ imageFileName: loginInfo['imageFileName'] })
+    // this.setState({ shimei: loginInfo['shimei'] })
+    // this.setState({ kengenCd: loginInfo['kengenCd'] })
+
+    /** テスト用 */
+    /**　＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝*/
+    this.setState({ userid: '1001' })
+    this.setState({ password: '5555' })
+    this.setState({ tShainPk: 1 })
+    this.state.userid = '1001'
+    this.state.tShainPk = 1
+    this.state.fromShainPk = 2
+    this.state.shimei = 'テスト　太郎'
+    this.state.imageFileName = require('./../images/man1.jpg')
+    /**　＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝*/
+
+    // this.setState({ imageFileName: loginInfo['imageFileName'] })
+    // this.setState({ shimei: loginInfo['shimei'] })
+    // this.setState({ kengenCd: loginInfo['kengenCd'] })
+
+    // 前画面情報取得
+    // var chatSelectInfo = await this.getChatSelectInfo()
+    // this.setState({ fromShainPk: chatSelectInfo['t_shain_Pk'] })
+
+    // 初期表示情報取得
+    this.setState({ chatUser: this.state.shimei })
+    this.findChat()
+
+    // this.setState({
+    //   messages: [
+    //     {
+    //       _id: 5,
+    //       text:
+    //         '障害の原因調査について、助けていただきありがとうございました。',
+    //       createdAt: new Date(),
+    //       user: {
+    //         _id: 6,
+    //         name: '安倍　大翔',
+    //         avatar: require('./../images/man1.jpg')
+    //       }
+    //     },
+    //     {
+    //       _id: 1,
+    //       text: 'お疲れ様です。',
+    //       createdAt: '2019/05/15',
+    //       user: {
+    //         _id: 2,
+    //         name: '安倍　大翔',
+    //         avatar: require('./../images/man1.jpg')
+    //       }
+    //     }
+    //   ]
+    // })
+  }
+
+  //ログイン情報取得
+  getLoginInfo = async () => {
+    try {
+      return JSON.parse(await AsyncStorage.getItem('loginInfo'))
+    } catch (error) {
+      return
+    }
+  }
+
+  // チャット選択情報取得（前画面からのパラメータ）
+  getChatSelectInfo = async () => {
+    try {
+      return JSON.parse(await AsyncStorage.getItem('chatInfo'))
+    } catch (error) {
+      return
+    }
+  }
+
+  //画面初期表示情報取得
+  findChat = async () => {
+    await fetch(restdomain + '/chat/find', {
+      method: 'POST',
+      body: JSON.stringify(this.state),
+      headers: new Headers({ 'Content-type': 'application/json' })
+    })
+      .then(function(response) {
+        return response.json()
+      })
+      .then(
+        function(json) {
+          // 結果が取得できない場合は終了
+          if (typeof json.data === 'undefined') {
+            return
+          }
+          // 検索結果の取得
+          var dataList = json.data
+          this.setState({ resultList: dataList })
+
+          var chat = []
+          for (var i in dataList) {
+            // alert(dataList[i].t_chat_pk)
+            chat.push({
+              // _id: dataList[i].t_chat_pk,
+              _id: dataList[i].t_chat_pk,
+              text: dataList[i].comment,
+              createdAt: dataList[i].post_dttm,
+              user: {
+                _id: dataList[i].from_shain_pk,
+                name: 'あいうえお',
+                avatar: this.state.imageFileName
+              }
+            })
+          }
+          this.setState({ messages: chat })
+          alert(JSON.stringify(chat))
+        }.bind(this)
+      )
+      .catch(error => console.error(error))
+  }
 
   onPressLogoutButton = () => {
     this.props.navigation.navigate('Login')
@@ -69,6 +186,81 @@ export default class ChatCoinForm extends Component {
   onPressHomeButton = () => {
     this.props.navigation.navigate('Home')
   }
+
+  onPressChatCoin() {
+    // パラメータ設定
+    let chatCoinInfo = {
+      t_shain_Pk: this.state.fromShainPk,
+      shimei: this.state.chatUser,
+      image_file_nm: this.state.imageFileName
+    }
+    this.setChatCoinInfo(JSON.stringify(chatCoinInfo))
+    // 画面遷移
+    this.props.navigation.navigate('ChatCoin')
+  }
+  setChatCoinInfo = async chatCoinInfo => {
+    try {
+      await AsyncStorage.removeItem('chatCoinInfo')
+      await AsyncStorage.setItem('chatCoinInfo', chatCoinInfo)
+    } catch (error) {
+      alert(error)
+      return
+    }
+  }
+
+  reply() {
+    return {
+      _id: 1,
+      text:
+        '【300コインを送付しました】\n障害の原因調査について、わかりやすく教えていただき、ありがとうございました。大変勉強になりました!',
+      createdAt: new Date(),
+      user: {
+        _id: 2,
+        name: '安倍　大翔',
+        avatar: require('./../images/man1.jpg')
+      }
+    }
+  }
+
+  // onSend = async (messages = []) => {
+  //   this.state.message = messages[0].text
+  //   await fetch(restdomain + '/chat_msg/create', {
+  //     method: 'POST',
+  //     mode: 'cors',
+  //     body: JSON.stringify(this.state),
+  //     headers: new Headers({ 'Content-type': 'application/json' })
+  //   })
+  //     .then(
+  //       function(response) {
+  //         return response.json()
+  //       }.bind(this)
+  //     )
+  //     .then(
+  //       function(json) {
+  //         if (json.status) {
+  //           this.setState(previousState => ({
+  //             messages: GiftedChat.append(
+  //               GiftedChat.append(previousState.messages, messages)
+  //             )
+  //           }))
+  //         }
+  //       }.bind(this)
+  //     )
+  //     .catch(error => console.error(error))
+
+  onSend(messages = []) {
+    this.setState(previousState => ({
+      messages: GiftedChat.append(previousState.messages, messages)
+    }))
+
+    // this.setState(previousState => ({
+    //   messages: GiftedChat.append(
+    //     GiftedChat.append(previousState.messages, messages),
+    //     this.reply()
+    //   )
+    // }))
+  }
+
   render() {
     const { name, email } = this.state
     const footerStyle = {
@@ -99,318 +291,34 @@ export default class ChatCoinForm extends Component {
                   style={{
                     fontSize: 24,
                     color: '#FFFFFF',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    fontWeight: 'bold'
                   }}
                 >
-                  佐藤　結菜
+                  {this.state.chatUser}
                 </Text>
               </View>
             </View>
           }
           rightComponent={
-            <Image
-              source={require('./../images/coin_icon.png')}
-              style={styles.menu_icon}
-            />
+            <TouchableHighlight onPress={() => this.onPressChatCoin()}>
+              <Image
+                source={require('./../images/coin_icon.png')}
+                style={styles.menu_icon}
+              />
+            </TouchableHighlight>
           }
           backgroundColor="#ff5622"
         />
-        <ScrollView>
-          <View>
-            <Text
-              style={{
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'center',
-                marginTop: 20
-              }}
-            >
-              2019/1/20
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'nowrap'
-            }}
-          >
-            <Avatar
-              size="small"
-              rounded
-              source={require('./../images/woman3.jpg')}
-              //activeOpacity={0.7}
-              containerStyle={{ marginLeft: 10, marginRight: 10 }}
-            />
-            <Text
-              style={{
-                flex: 1,
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'left'
-              }}
-            >
-              佐藤　結菜
-            </Text>
-            <Text
-              style={{
-                flex: 1,
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'right',
-                marginRight: 10
-              }}
-            >
-              13:05
-            </Text>
-          </View>
-          <Text
-            style={{
-              fontSize: 20,
-              color: 'gray',
-              textAlign: 'left',
-              marginLeft: 54,
-              marginTop: -5
-            }}
-          >
-            今日はありがとうございました。
-          </Text>
-
-          <View>
-            <Text
-              style={{
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'center',
-                marginTop: 20
-              }}
-            >
-              2019/1/22
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'nowrap'
-            }}
-          >
-            <Avatar
-              size="small"
-              rounded
-              source={require('./../images/woman3.jpg')}
-              //activeOpacity={0.7}
-              containerStyle={{ marginLeft: 10, marginRight: 10 }}
-            />
-            <Text
-              style={{
-                flex: 1,
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'left'
-              }}
-            >
-              佐藤　結菜
-            </Text>
-            <Text
-              style={{
-                flex: 1,
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'right',
-                marginRight: 10
-              }}
-            >
-              19:55
-            </Text>
-          </View>
-          <Text
-            style={{
-              fontSize: 20,
-              color: 'blue',
-              textAlign: 'left',
-              marginLeft: 54,
-              marginTop: -5
-            }}
-          >
-            【300コインを送付しました】
-          </Text>
-          <Text
-            style={{
-              fontSize: 20,
-              color: 'blue',
-              textAlign: 'left',
-              marginLeft: 54,
-              marginTop: 0
-            }}
-          >
-            議事録を作成いただきありがとうございました。
-          </Text>
-          <Text
-            style={{
-              fontSize: 20,
-              color: 'blue',
-              textAlign: 'left',
-              marginLeft: 54,
-              marginTop: 0
-            }}
-          >
-            とても見やすく分かりやすかったです。
-          </Text>
-
-          <Text
-            style={{
-              fontSize: 20,
-              color: 'blue',
-              textAlign: 'left',
-              marginLeft: 54
-            }}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'nowrap'
-            }}
-          >
-            <Avatar
-              size="small"
-              rounded
-              source={require('./../images/man1.jpg')}
-              //activeOpacity={0.7}
-              containerStyle={{ marginLeft: 10, marginRight: 10 }}
-            />
-            <Text
-              style={{
-                flex: 1,
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'left'
-              }}
-            >
-              安倍　大翔
-            </Text>
-            <Text
-              style={{
-                flex: 1,
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'right',
-                marginRight: 10
-              }}
-            >
-              20:05
-            </Text>
-          </View>
-          <Text
-            style={{
-              fontSize: 20,
-              color: 'gray',
-              textAlign: 'left',
-              marginLeft: 54,
-              marginTop: -5
-            }}
-          >
-            ありがとう～。
-          </Text>
-
-          <Text
-            style={{
-              fontSize: 20,
-              color: 'blue',
-              textAlign: 'left',
-              marginLeft: 54
-            }}
-          />
-          <Divider style={{ backgroundColor: 'red' }} />
-          <Text
-            style={{
-              fontSize: 20,
-              color: 'gray',
-              textAlign: 'center'
-            }}
-          >
-            以下未読
-          </Text>
-
-          <View>
-            <Text
-              style={{
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'center',
-                marginTop: 20
-              }}
-            >
-              2019/2/1
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'nowrap'
-            }}
-          >
-            <Avatar
-              size="small"
-              rounded
-              source={require('./../images/woman3.jpg')}
-              //activeOpacity={0.7}
-              containerStyle={{ marginLeft: 10, marginRight: 10 }}
-            />
-            <Text
-              style={{
-                flex: 1,
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'left'
-              }}
-            >
-              佐藤　結菜
-            </Text>
-            <Text
-              style={{
-                flex: 1,
-                fontSize: 20,
-                color: 'gray',
-                textAlign: 'right',
-                marginRight: 10
-              }}
-            >
-              23:05
-            </Text>
-          </View>
-          <Text
-            style={{
-              fontSize: 20,
-              color: 'gray',
-              textAlign: 'left',
-              marginLeft: 54,
-              marginTop: -5
-            }}
-          >
-            お疲れ様です。
-          </Text>
-          <Text
-            style={{
-              fontSize: 20,
-              color: 'gray',
-              textAlign: 'left',
-              marginLeft: 54,
-              marginTop: 0
-            }}
-          >
-            明日の会議は何時からでしょうか？
-          </Text>
-        </ScrollView>
-        <Divider style={{ backgroundColor: 'lightgray' }} />
-        <View style={footerStyle}>
-          <FormInput
-            onChangeText={name => this.setState({ name })}
-            value={name}
-            placeholder="メッセージを入力"
-          />
-        </View>
+        <GiftedChat
+          dateFormat={'YYYY/MM/DD'}
+          timeFormat={'H:mm'}
+          messages={this.state.messages} //stateで管理しているメッセージ
+          onSend={messages => this.onSend(messages)} //送信ボタン押した時の動作
+          user={{
+            _id: 1
+          }}
+        />
       </View>
     )
   }

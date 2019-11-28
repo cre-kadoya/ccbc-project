@@ -30,6 +30,7 @@ const loginGroupRouter = require('./routes/login_group')
 // TODO : ここにComComCoin用のAPIを追加していく
 const comcomcoinHomeRouter = require('./routes/comcomcoin_home')
 const articleRouter = require('./routes/article')
+const chatRouter = require('./routes/chat')
 
 const sampleRouter = require('./routes/sample')
 
@@ -100,6 +101,7 @@ app.use('/login_group', loginGroupRouter)
 // TODO : ここにComComCoin用のAPIを追加していく
 app.use('/comcomcoin_home', comcomcoinHomeRouter)
 app.use('/article', articleRouter)
+app.use('/chat', chatRouter)
 
 // sample
 app.use('/sample', sampleRouter)

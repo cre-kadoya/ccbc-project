@@ -12,11 +12,16 @@ import ConfirmDialog from './components/ConfirmDialog'
 import AlertDialog from './components/AlertDialog'
 
 const restdomain = require('./common/constans.js').restdomain
+const CHAR_LEN_TITLE = 30
+const CHAR_LEN_HASHTAG = 10
+const CHAR_LEN_CONTENTS = 1000
+const HASHTAG_UPPER_LIMIT = 3
 
 export default class ArticleEntry extends BaseComponent {
   constructor(props) {
     super(props)
     this.state = {
+      mode: "",
       selectCategory: null,
       selectArticle: null,
       t_kiji_pk: "",
@@ -50,6 +55,7 @@ export default class ArticleEntry extends BaseComponent {
     this.getPermissionAsync()
 
     // 記事照会画面からのパラメータ受け取り
+    const mode = this.props.navigation.getParam("mode")
     const paramCategory = this.props.navigation.getParam("selectCategory")
     const paramArticle = this.props.navigation.getParam("selectArticle")
     if (paramArticle !== null) {
@@ -73,6 +79,7 @@ export default class ArticleEntry extends BaseComponent {
       })
     }
     this.setState({
+      mode: mode,
       selectCategory: paramCategory,
       selectArticle: paramArticle,
       categoryNm: paramCategory.category_nm
@@ -91,17 +98,33 @@ export default class ArticleEntry extends BaseComponent {
   /** 記事投稿ボタン押下 */
   onClickEntry = async () => {
     // 入力チェック
+    var alertMessage = ""
     if (this.state.title == "") {
-      this.setState({
-        alertDialogVisible: true,
-        alertDialogMessage: "タイトルを入力してください"
-      })
-      return
+      alertMessage += "タイトルを入力してください\n\n"
     }
     if (this.state.contents == "") {
+      alertMessage += "記事の内容を入力してください\n\n"
+    }
+    if (this.state.title.length > CHAR_LEN_TITLE) {
+      alertMessage += "タイトルの文字数が超過しています" + "（" + this.state.title.length + "文字）\n\n"
+    }
+    var hashes = this.state.hashtag_str.replace("　", " ").split(" ")
+    if (hashes.length > HASHTAG_UPPER_LIMIT) {
+      alertMessage += "タグの数は" + HASHTAG_UPPER_LIMIT + "つまでです\n\n"
+    } else {
+      for (var i = 0; i < hashes.length; i++) {
+        if (hashes[i].length > CHAR_LEN_HASHTAG) {
+          alertMessage += "タグの文字数が超過しています" + "（" + hashes[i].length + "文字）\n\n"
+        }
+      }
+    }
+    if (this.state.contents.length > CHAR_LEN_CONTENTS) {
+      alertMessage += "記事の文字数が超過しています" + "（" + this.state.contents.length + "文字）\n\n"
+    }
+    if (alertMessage !== "") {
       this.setState({
         alertDialogVisible: true,
-        alertDialogMessage: "記事の内容を入力してください"
+        alertDialogMessage: alertMessage
       })
       return
     }
@@ -178,7 +201,7 @@ export default class ArticleEntry extends BaseComponent {
           } else {
             // 記事照会画面に戻る
             this.props.navigation.navigate('ArticleRefer', {
-              mode: "article",
+              mode: this.state.mode,
               selectCategory: this.state.selectCategory
             })
           }
@@ -231,7 +254,7 @@ export default class ArticleEntry extends BaseComponent {
                 </View>
                 <View>
                   {/* タイトル */}
-                  <Text style={styles.inputTitle}>タイトル</Text>
+                  <Text style={styles.inputTitle}>{"タイトル（" + CHAR_LEN_TITLE + "文字以内）"}</Text>
                   <TextInput
                     style={styles.inputText}
                     value={this.state.title}
@@ -240,23 +263,20 @@ export default class ArticleEntry extends BaseComponent {
                 </View>
                 <View>
                   {/* ハッシュタグ */}
-                  <Text style={styles.inputTitle}>タグ（スペース区切り #は不要）</Text>
+                  <Text style={styles.inputTitle}>
+                    {"タグ（1タグ" + CHAR_LEN_HASHTAG + "文字以内、スペース区切りで" + HASHTAG_UPPER_LIMIT + "つまで #は不要）"}
+                  </Text>
                   <TextInput
                     style={styles.inputText}
                     value={this.state.hashtag_str}
                     onChangeText={text => { this.setState({ hashtag_str: text }) }}
                   />
                 </View>
-                <View
-                  style={{
-                    marginTop: 10,
-                    marginButtom: 10
-                  }}
-                >
+                <View style={{ marginTop: 10, marginButtom: 10 }}>
                   {/* 記事内容 */}
                   <Text style={styles.inputTitle}>
-                    記事
-                </Text>
+                    {"記事（" + CHAR_LEN_CONTENTS + "文字以内）"}
+                  </Text>
                   <TextInput
                     multiline={true}
                     numberOfLines={8}

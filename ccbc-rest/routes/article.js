@@ -366,23 +366,41 @@ function selectKijiWithCond(db, req) {
     var sqlcond_dt_to = ""
     var sqlcond_hashtag = ""
     var sqlcond_keyword = ""
+    var param_hashtag = {}
+    var param_keyword = {}
     if (req.body.current_kiji_category_pk !== null && req.body.current_kiji_category_pk !== "") {
+      // 記事カテゴリ選択時
       sqlcond_kiji_category_pk = " and kij.t_kiji_category_pk = :t_kiji_category_pk"
     }
     if (req.body.searchCondKijiPk !== null && req.body.searchCondKijiPk !== "") {
+      // ホーム画面から遷移時の記事直接指定
       sqlcond_kiji_pk = " and kij.t_kiji_pk = :t_kiji_pk"
     } else if (req.body.readLastKijiPk !== null && req.body.readLastKijiPk !== "") {
+      // 最下部へスクロールした際の過去分読み込み
       sqlcond_kiji_pk = " and kij.t_kiji_pk < :t_kiji_pk_read_last"
     }
     if (req.body.searchCondYear !== null && req.body.searchCondYear !== '') {
+      // 検索機能：投稿年指定
       sqlcond_dt_from = " and kij.post_dt >= :dt_from"
       sqlcond_dt_to = " and kij.post_dt <= :dt_to"
     }
     if (req.body.searchCondHashtag !== null && req.body.searchCondHashtag !== '') {
-      sqlcond_hashtag = " and exists (select * from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk and has.hashtag like :hashtag)"
+      // 検索機能：タグ
+      // スペース区切りでの複数キーワードをAND条件で指定
+      var params = req.body.searchCondHashtag.replace("　", " ").split(" ")
+      for (var i = 0; i < params.length; i++) {
+        sqlcond_hashtag = " and exists (select * from t_kiji_hashtag has where kij.t_kiji_pk = has.t_kiji_pk and lower(has.hashtag) like :hashtag" + i + ")"
+        param_hashtag['hashtag' + i] = "%" + params[i].toLowerCase() + "%"
+      }
     }
     if (req.body.searchCondKeyword !== null && req.body.searchCondKeyword !== '') {
-      sqlcond_keyword = " and (kij.title like :keyword or kij.contents like :keyword)"
+      // 検索機能：キーワード
+      // スペース区切りでの複数キーワードをAND条件で指定
+      var params = req.body.searchCondKeyword.replace("　", " ").split(" ")
+      for (var i = 0; i < params.length; i++) {
+        sqlcond_keyword += " and (lower(kij.title) like :keyword" + i + " or lower(kij.contents) like :keyword" + i + ")"
+        param_keyword['keyword' + i] = "%" + params[i].toLowerCase() + "%"
+      }
     }
 
     // 記事情報テーブルより条件を絞り込んで取得
@@ -407,18 +425,19 @@ function selectKijiWithCond(db, req) {
       sqlcond_keyword +
       " order by kij.t_kiji_pk desc" +
       " limit " + READ_COUNT
-
     db.query(sql, {
-      replacements: {
-        t_kiji_category_pk: req.body.current_kiji_category_pk,
-        t_shain_pk: req.body.loginShainPk,
-        t_kiji_pk: req.body.searchCondKijiPk,
-        t_kiji_pk_read_last: req.body.readLastKijiPk,
-        dt_from: req.body.searchCondYear + "/01/01",
-        dt_to: req.body.searchCondYear + "/12/31",
-        hashtag: "%" + req.body.searchCondHashtag + "%",
-        keyword: "%" + req.body.searchCondKeyword + "%"
-      },
+      replacements:
+        Object.assign(
+          {
+            t_kiji_category_pk: req.body.current_kiji_category_pk,
+            t_shain_pk: req.body.loginShainPk,
+            t_kiji_pk: req.body.searchCondKijiPk,
+            t_kiji_pk_read_last: req.body.readLastKijiPk,
+            dt_from: req.body.searchCondYear + "/01/01",
+            dt_to: req.body.searchCondYear + "/12/31",
+          },
+          param_hashtag,
+          param_keyword),
       type: db.QueryTypes.RAW
     })
       .spread((datas, metadata) => {
@@ -481,7 +500,6 @@ function insertOrUpdateKiji(db, tx, req, isInsert) {
  */
 function insertZoyo(db, tx, req, transactionId) {
   return new Promise((resolve, reject) => {
-
     var sql =
       "insert into t_zoyo (zoyo_moto_shain_pk, zoyo_saki_shain_pk, transaction_id, zoyo_comment, nenji_flg, delete_flg, insert_user_id, insert_tm) " +
       " values (:zoyo_moto_shain_pk, :zoyo_saki_shain_pk, :transaction_id, :zoyo_comment, :nenji_flg, '0', :insert_user_id, current_timestamp) "
