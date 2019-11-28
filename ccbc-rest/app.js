@@ -28,7 +28,9 @@ const shain_kensakuRouter = require('./routes/shain_kensaku')
 const loginGroupRouter = require('./routes/login_group')
 
 // TODO : ここにComComCoin用のAPIを追加していく
+const comcomcoinHomeRouter = require('./routes/comcomcoin_home')
 const articleRouter = require('./routes/article')
+const chatRouter = require('./routes/chat')
 
 const sampleRouter = require('./routes/sample')
 
@@ -46,7 +48,7 @@ app.use(helmet())
 /**
  \* Cross-Origin Resource Sharingを有効にする記述（HTTPレスポンスヘッダの追加）
  \*/
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', req.headers.origin)
   res.header(
     'Access-Control-Allow-Headers',
@@ -61,7 +63,7 @@ app.use(function(req, res, next) {
 /**
  \* OPTIONSメソッドの実装
  \*/
-app.options('*', function(req, res) {
+app.options('*', function (req, res) {
   res.sendStatus(200)
 })
 
@@ -97,7 +99,9 @@ app.use('/login_group', loginGroupRouter)
 
 // ComComCoin
 // TODO : ここにComComCoin用のAPIを追加していく
+app.use('/comcomcoin_home', comcomcoinHomeRouter)
 app.use('/article', articleRouter)
+app.use('/chat', chatRouter)
 
 // sample
 app.use('/sample', sampleRouter)

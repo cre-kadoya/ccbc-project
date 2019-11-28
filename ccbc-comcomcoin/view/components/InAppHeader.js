@@ -5,7 +5,7 @@ import { Header, Icon } from 'react-native-elements'
 class InAppHeader extends Component {
 	// Homeボタン押下
 	onPressHomeButton = () => {
-		this.props.navigate('Menu')
+		this.props.navigate('Home')
 	}
 
 	// ログアウトボタン押下
@@ -36,7 +36,7 @@ class InAppHeader extends Component {
 								alignItems: 'center'
 							}}
 						>
-							<Image source={require('./../../images/HARVEST3.png')} />
+							<Image source={require('./../../images/ComComCoin_logo_02.png')} />
 						</View>
 					}
 					rightComponent={

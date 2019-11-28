@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Image } from 'react-native'
+import { AsyncStorage, StyleSheet, View, Image } from 'react-native'
 import { Header, Icon, Text } from 'react-native-elements'
 import InAppHeader from './components/InAppHeader'
 
@@ -13,7 +13,30 @@ export default class MenuPh2 extends Component {
     this.state = {}
   }
 
-  async componentWillMount() {}
+  async componentWillMount() {
+    let groupInfo = {
+      saveFlg: "1",
+      group_id: "CCCtest",
+      db_name: "crecoin",
+      bc_addr: "0xf8be729ec16c4ad729b10202e408263d2b286f07"
+    }
+    let loginInfo = {
+      userid: "sapporo",
+      password: "password",
+      tShainPk: 23,
+      imageFileName: "man1.jpg",
+      shimei: "札幌　太郎",
+      kengenCd: "1",
+      tokenId: "*****"
+    }
+    try {
+      // alert(JSON.stringify(loginInfo))
+      await AsyncStorage.setItem('groupInfo', JSON.stringify(groupInfo))
+      await AsyncStorage.setItem('loginInfo', JSON.stringify(loginInfo))
+    } catch (error) {
+      return
+    }
+  }
 
   onPressLogoutButton = () => {
     this.props.navigation.navigate('MenuPh2')
@@ -49,19 +72,19 @@ export default class MenuPh2 extends Component {
     this.props.navigation.navigate('Home')
   }
   onPressKokokuButton = () => {
-    this.props.navigation.navigate('Kokoku')
+    this.props.navigation.navigate('HomeAdvertise')
   }
   onPressOshiraseButton = () => {
-    this.props.navigation.navigate('Oshirase')
+    this.props.navigation.navigate('HomeInfoList')
   }
   onPressOshiraseShosaiButton = () => {
-    this.props.navigation.navigate('OshiraseShosai')
+    this.props.navigation.navigate('HomeInformation')
   }
   onPressSaishinKijiButton = () => {
-    this.props.navigation.navigate('SaishinKiji')
+    this.props.navigation.navigate('HomeArticleList', { mode: "new" })
   }
   onPressNinkiKijiButton = () => {
-    this.props.navigation.navigate('NinkiKiji')
+    this.props.navigation.navigate('HomeArticleList', { mode: "popular" })
   }
   render() {
     return (

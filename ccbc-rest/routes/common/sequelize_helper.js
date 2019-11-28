@@ -19,10 +19,9 @@ exports.sequelize2 = new Sequelize(
 )
 
 exports.sequelize3 = function(db_name) {
-  console.log('sequelize3')
-  console.log('db_name:' + db_name)
+  console.log('DBInfo:' + process.env.DATABASE_URL + db_name)
   return new Sequelize(
-    process.env.DATABASE_URL + '/' + db_name,
+    process.env.DATABASE_URL + db_name,
     {
       dialect: 'postgres',
       operatorsAliases: false,
@@ -34,9 +33,9 @@ exports.sequelize3 = function(db_name) {
 exports.sequelizeDB = function(req) {
   var db
   if (req.body.db_name != null && req.body.db_name != '') {
-    db = sequelize3(req.body.db_name)
+    db = this.sequelize3(req.body.db_name)
   } else {
-    db = sequelize
+    db = this.sequelize
   }
   return db
 }

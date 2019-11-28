@@ -8,11 +8,10 @@ import LoginGroupForm from './view/LoginGroup'
 import LoginForm from './view/Login'
 // ホーム機能
 import HomeForm from './view/Home'
-import KokokuForm from './view/kokoku'
-import OshiraseForm from './view/oshirase'
-import OshiraseShosaiForm from './view/oshirase2'
-import SaishinKijiForm from './view/saishinKiji'
-import NinkiKijiForm from './view/ninkiKiji'
+import HomeAdvertiseForm from './view/HomeAdvertise'
+import HomeInfoListForm from './view/HomeInfoList'
+import HomeInformationForm from './view/HomeInformation'
+import HomeArticleListForm from './view/HomeArticleList'
 // チャット機能
 import ChatSelectForm from './view/chat_select'
 import ChatMsgForm from './view/chat_msg'
@@ -32,11 +31,10 @@ var HomeNavigator = createStackNavigator(
     LoginGroup: { screen: LoginGroupForm },
     Login: { screen: LoginForm },
     Home: { screen: HomeForm },
-    Kokoku: { screen: KokokuForm },
-    Oshirase: { screen: OshiraseForm },
-    OshiraseShosai: { screen: OshiraseShosaiForm },
-    SaishinKiji: { screen: SaishinKijiForm },
-    NinkiKiji: { screen: NinkiKijiForm },
+    HomeAdvertise: { screen: HomeAdvertiseForm },
+    HomeInfoList: { screen: HomeInfoListForm },
+    HomeInformation: { screen: HomeInformationForm },
+    HomeArticleList: { screen: HomeArticleListForm },
     ChatSelect: { screen: ChatSelectForm },
     ChatMsg: { screen: ChatMsgForm },
     ChatCoin: { screen: ChatCoinForm },
