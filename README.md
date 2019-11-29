@@ -12,5 +12,8 @@
 * **CCBC_DATABASE_URL_HARVEST_GROUP**=postgres://[ユーザ]:[パスワード]@[DBサーバのIPアドレス]:[ポート]/[HARVEST-GROUPのDB名]
 * **CCBC_DATABASE_URL**=postgres://[ユーザ]:[パスワード]@[DBサーバのIPアドレス]:[ポート]/
 
-ちなみにmacの場合  
+macの場合  
 `echo 'export [環境変数名]=[内容]' >> ~/.bash_profile`
+
+linuxの場合  
+`export [環境変数名]=[内容]`
