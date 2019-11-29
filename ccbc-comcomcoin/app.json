@@ -12,6 +12,11 @@
       "versionCode": 5,
       "package": "com.creativeconsultant.comcomcoin",
       "permissions": []
-    }
+    },
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "description": ""
   }
 }

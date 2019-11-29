@@ -7,9 +7,9 @@ var Web3 = require("web3");
 var web3 = new Web3();
 
 // 接続情報（環境変数に設定）
-const bcUrl = process.env.BC_URL;
+const bcUrl = process.env.CCBC_BC_URL;
 // スマートコントラクトのアドレス（ベース）
-const baseContractAddress = process.env.BASE_CONTRACT_ADDRESS;
+const baseContractAddress = process.env.CCBC_BASE_CONTRACT_ADDRESS;
 // スマートコントラクトのアドレス（パラメータにより書き換え可能）
 let contractAddress = baseContractAddress;
 
