@@ -50,7 +50,7 @@ export default class Home extends BaseComponent {
           }
           // 取得したデータをStateに格納
           this.setState({
-            activeSlide: 0,
+            // activeSlide: 0,
             adList: json.data.adList,
             infoList: json.data.infoList,
             newArticleList: json.data.newArticleList,
@@ -80,47 +80,50 @@ export default class Home extends BaseComponent {
   render() {
     return (
       <View style={{ flex: 1 }}>
-        <View style={[{ flex: 0.2 }]}>
+        <View style={[{ flex: 0.15 }]}>
           <Text />
         </View>
 
         {/* -- 広告 -- */}
         <View style={{ flex: 1.0, flexDirection: 'row' }}>
-          <View style={styles.container}>
-            <Carousel
-              data={this.state.adList}
-              firstItem={0}
-              layout={'default'}
-              renderItem={this.renderItem}
-              onSnapToItem={index => {
-                this.setState({ activeSlide: index })
-              }}
-              itemWidth={windowWidth}
-              sliderWidth={windowWidth}
-              containerCustomStyle={styles.carousel}
-              slideStyle={{ flex: 1 }}
-              loop={true}
-              autoplay={true}
-            />
-            <View>
-              <Pagination
-                dotsLength={this.state.adList.length}
-                activeDotIndex={this.state.activeSlide}
-                dotStyle={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 5,
-                  marginHorizontal: 8,
-                  backgroundColor: 'rgba(200, 200, 200, 0.92)'
+          {this.state.adList.length > 0 && (
+            <View style={styles.container}>
+              <Carousel
+                data={this.state.adList}
+                firstItem={0}
+                layout={'default'}
+                renderItem={this.renderItem}
+                onSnapToItem={index => {
+                  this.setState({ activeSlide: index })
                 }}
-                inactiveDotStyle={
-                  {}
-                }
-                inactiveDotOpacity={0.4}
-                inactiveDotScale={0.6}
+                itemWidth={windowWidth}
+                sliderWidth={windowWidth}
+                containerCustomStyle={styles.carousel}
+                slideStyle={{ flex: 1 }}
+                loop={true}
+                autoplay={true}
               />
+              <View>
+                <Pagination
+                  dotsLength={this.state.adList.length}
+                  activeDotIndex={this.state.activeSlide}
+                  containerStyle={{ paddingVertical: 10 }}
+                  dotStyle={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    marginHorizontal: 8,
+                    backgroundColor: 'rgba(200, 200, 200, 0.92)'
+                  }}
+                  inactiveDotStyle={
+                    {}
+                  }
+                  inactiveDotOpacity={0.4}
+                  inactiveDotScale={0.6}
+                />
+              </View>
             </View>
-          </View>
+          )}
         </View>
 
         {/* -- お知らせ -- */}
@@ -138,7 +141,7 @@ export default class Home extends BaseComponent {
           {/* お知らせの件数分、繰り返し（最大3件） */}
           {this.state.infoList.map((item, i) => {
             return (
-              <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginTop: 5 }} key={i}>
+              <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ marginTop: 0 }} key={i}>
                 {moment(new Date(item.notice_dt)).format('YYYY/MM/DD')}{' '}{item.title}
               </Text>
             )
@@ -170,20 +173,21 @@ export default class Home extends BaseComponent {
                     mode: "home",
                     selectKijiPk: item.t_kiji_pk
                   })}>
-                  <Card containerStyle={{ height: 120, width: 150 }}>
+                  <Card containerStyle={{ height: 115, width: 150, marginTop: 2, marginBottom: 2 }}>
                     {/* 画像 */}
                     <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
                       {(item.file_path !== "" && item.file_path !== null) &&
                         <Image
                           source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
-                          style={{ width: 70, height: 70 }}
+                          style={{ width: 60, height: 60 }}
+                          resizeMode='contain'
                         />
                       }
                       {/* 画像が未登録の場合はNo-Imageを表示 */}
                       {(item.file_path === "" || item.file_path === null) &&
                         <Image
                           source={require('./../images/icon-noimage.png')}
-                          style={{ width: 70, height: 70 }}
+                          style={{ width: 60, height: 60 }}
                         />
                       }
                     </View>
@@ -238,20 +242,21 @@ export default class Home extends BaseComponent {
                     mode: "home",
                     selectKijiPk: item.t_kiji_pk
                   })}>
-                  <Card containerStyle={{ height: 120, width: 150 }}>
+                  <Card containerStyle={{ height: 115, width: 150, marginTop: 2, marginBottom: 2 }}>
                     {/* 画像 */}
                     <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
                       {(item.file_path !== "" && item.file_path !== null) &&
                         <Image
                           source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
-                          style={{ width: 70, height: 70 }}
+                          style={{ width: 60, height: 60 }}
+                          resizeMode='contain'
                         />
                       }
                       {/* 画像が未登録の場合はNo-Imageを表示 */}
                       {(item.file_path === "" || item.file_path === null) &&
                         <Image
                           source={require('./../images/icon-noimage.png')}
-                          style={{ width: 70, height: 70 }}
+                          style={{ width: 60, height: 60 }}
                         />
                       }
                     </View>
@@ -282,7 +287,7 @@ export default class Home extends BaseComponent {
         </View>
 
         {/* -- 各機能アイコン -- */}
-        <View style={[{ flex: 0.4, flexDirection: 'row' }]}>
+        <View style={[{ flex: 0.3, flexDirection: 'row' }]}>
           <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <Image
               resizeMode="contain"

@@ -442,7 +442,8 @@ export default class ArticleRefer extends BaseComponent {
                   {(item.file_path !== "" && item.file_path !== null) &&
                     <Image
                       source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
-                      style={{ width: 300, height: 300 }} />
+                      style={{ width: 300, height: 300 }}
+                      resizeMode='contain' />
                   }
                 </View>
               </Card>

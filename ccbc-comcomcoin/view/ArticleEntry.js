@@ -150,7 +150,7 @@ export default class ArticleEntry extends BaseComponent {
     if (this.state.imageData.uri !== "") {
       fileName = moment(new Date()).format('YYYYMMDDHHmmssSS') + ".png"
       data.append('imageData', {
-        uri: this.state.imageData.uri,
+        uri: (Constants.platform.android ? 'file://' : '') + this.state.imageData.uri,
         type: this.state.imageData.type,
         name: fileName
       })
@@ -165,7 +165,6 @@ export default class ArticleEntry extends BaseComponent {
     data.append('post_dt', new Date())
     data.append('post_tm', new Date())
     data.append('file_path', fileName)
-    data.append('hashtag', this.state.hashtag)
     data.append('hashtag_str', this.state.hashtag_str)
     // data.append('editArticle', {
     //   t_kiji_pk: this.state.t_kiji_pk,
@@ -190,8 +189,11 @@ export default class ArticleEntry extends BaseComponent {
     })
       .then(
         function (response) {
-          return response.json()
-        }.bind(this)
+          if (response.ok) {
+            return response.json()
+          }
+          throw new Error('Network response was not ok.');
+        }
       )
       .then(
         function (json) {
@@ -208,6 +210,24 @@ export default class ArticleEntry extends BaseComponent {
         }.bind(this)
       )
       .catch(error => console.error(error))
+
+    // var xhr = new XMLHttpRequest()
+    // xhr.open("POST", restdomain + '/article/edit')
+    // xhr.setRequestHeader("Content-type", "multipart/form-data")
+    // xhr.send(data)
+    // xhr.onreadystatechange = () => {
+    //   const json = xhr.response
+    //   alert(json)
+    //   if (!json.status) {
+    //     alert("APIエラー:" + xhr.responseText)
+    //   } else {
+    //     // 記事照会画面に戻る
+    //     this.props.navigation.navigate('ArticleRefer', {
+    //       mode: this.state.mode,
+    //       selectCategory: this.state.selectCategory
+    //     })
+    //   }
+    // }
   }
 
   /** 画像選択処理 */
@@ -215,7 +235,7 @@ export default class ArticleEntry extends BaseComponent {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 3]
+      aspect: [1, 1]
     })
     let data = {}
     if (!result.cancelled) {
@@ -292,7 +312,8 @@ export default class ArticleEntry extends BaseComponent {
                     <View style={{ marginTop: 10 }}>
                       <Image
                         source={{ uri: restdomain + `/uploads/article/${this.state.file_path}` }}
-                        style={{ width: 300, height: 300 }} />
+                        style={{ width: 300, height: 300 }}
+                        resizeMode='contain' />
                     </View>
                   )}
                   {this.state.imageData.uri !== "" && (
@@ -305,6 +326,7 @@ export default class ArticleEntry extends BaseComponent {
                           marginTop: 30,
                           marginBottom: 30
                         }}
+                        resizeMode='contain'
                       />
                     </View>
                   )}
