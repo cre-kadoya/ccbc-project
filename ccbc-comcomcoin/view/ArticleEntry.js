@@ -4,6 +4,7 @@ import { Icon } from 'react-native-elements'
 import * as ImagePicker from 'expo-image-picker'
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
+import axios from "axios"
 import moment from 'moment'
 import 'moment/locale/ja'
 import BaseComponent from './components/BaseComponent'
@@ -69,7 +70,7 @@ export default class ArticleEntry extends BaseComponent {
         post_dt: paramArticle.post_dt,
         post_tm: paramArticle.post_tm,
         file_path: paramArticle.file_path,
-        hashtag_str: paramArticle.hashtag_str.replace(/#/g, ' ')
+        hashtag_str: paramArticle.hashtag_str.replace(/#/g, "")
       })
     } else {
       // 新規投稿時
@@ -141,7 +142,7 @@ export default class ArticleEntry extends BaseComponent {
     this.setState({ confirmDialogVisible: false })
 
     // APIパラメータ作成
-    const data = new FormData()
+    let data = new FormData()
     data.append('db_name', this.state.db_name)
     data.append('loginShainPk', this.state.loginShainPk)
 
@@ -166,68 +167,65 @@ export default class ArticleEntry extends BaseComponent {
     data.append('post_tm', new Date())
     data.append('file_path', fileName)
     data.append('hashtag_str', this.state.hashtag_str)
-    // data.append('editArticle', {
-    //   t_kiji_pk: this.state.t_kiji_pk,
-    //   t_kiji_category_pk: this.state.t_kiji_category_pk,
-    //   t_shain_pk: this.state.t_shain_pk,
-    //   title: this.state.title,
-    //   contents: this.state.contents,
-    //   post_dt: new Date(),
-    //   post_tm: new Date(),
-    //   file_path: fileName,
-    //   hashtag: this.state.hashtag,
-    //   hashtag_str: this.state.hashtag_str
-    // })
+
+    // alert(JSON.stringify(data))
+
+    // TODO : fetchがAndroidだとエラーとなる。axiosを使用してみているが、APIは正常に終了し、戻ってきた際にエラーとなる模様
 
     // 記事API.投稿処理の呼び出し（DB登録→BC登録）
-    await fetch(restdomain + '/article/edit', {
-      method: 'POST',
-      mode: 'cors',
-      body: data,
-      // body: JSON.stringify(this.state),
-      headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'multipart/form-data' })
-    })
-      .then(
-        function (response) {
-          if (response.ok) {
-            return response.json()
-          }
-          throw new Error('Network response was not ok.');
+    await axios
+      .post(restdomain + '/article/edit',
+        data,
+        { headers: { 'Accept': 'application/json', 'Content-Type': 'multipart/form-data' } }
+      )
+      .then((res) => {
+        // this.setState({ contents: JSON.stringify(res) })
+        if (!res.data.status) {
+          // TODO：エラー処理
+          alert("APIエラー")
+        } else {
+          // 記事照会画面に戻る
+          this.props.navigation.navigate('ArticleRefer', {
+            mode: this.state.mode,
+            selectCategory: this.state.selectCategory
+          })
         }
-      )
-      .then(
-        function (json) {
-          if (!json.status) {
-            // TODO：エラー処理
-            alert("APIエラー")
-          } else {
-            // 記事照会画面に戻る
-            this.props.navigation.navigate('ArticleRefer', {
-              mode: this.state.mode,
-              selectCategory: this.state.selectCategory
-            })
-          }
-        }.bind(this)
-      )
-      .catch(error => console.error(error))
+      })
+    // .catch((error) => {
+    //   alert(error)
+    //   // console.error(error)
+    // })
 
-    // var xhr = new XMLHttpRequest()
-    // xhr.open("POST", restdomain + '/article/edit')
-    // xhr.setRequestHeader("Content-type", "multipart/form-data")
-    // xhr.send(data)
-    // xhr.onreadystatechange = () => {
-    //   const json = xhr.response
-    //   alert(json)
-    //   if (!json.status) {
-    //     alert("APIエラー:" + xhr.responseText)
-    //   } else {
-    //     // 記事照会画面に戻る
-    //     this.props.navigation.navigate('ArticleRefer', {
-    //       mode: this.state.mode,
-    //       selectCategory: this.state.selectCategory
-    //     })
-    //   }
-    // }
+    // await fetch(restdomain + '/article/edit', {
+    //   method: 'POST',
+    //   mode: 'cors',
+    //   body: data,
+    //   headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'multipart/form-data' })
+    //   // headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' })
+    // })
+    //   .then(
+    //     function (response) {
+    //       if (response.ok) {
+    //         return response.json()
+    //       }
+    //       throw new Error('Network response was not ok.');
+    //     }
+    //   )
+    //   .then(
+    //     function (json) {
+    //       if (!json.status) {
+    //         // TODO：エラー処理
+    //         alert("APIエラー")
+    //       } else {
+    //         // 記事照会画面に戻る
+    //         this.props.navigation.navigate('ArticleRefer', {
+    //           mode: this.state.mode,
+    //           selectCategory: this.state.selectCategory
+    //         })
+    //       }
+    //     }.bind(this)
+    //   )
+    //   .catch(error => console.error(error))
   }
 
   /** 画像選択処理 */
