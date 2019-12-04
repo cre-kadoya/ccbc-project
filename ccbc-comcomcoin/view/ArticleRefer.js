@@ -432,7 +432,7 @@ export default class ArticleRefer extends BaseComponent {
 
                 {/* 記事内容 */}
                 <View style={{ marginTop: 10, marginBottom: 10 }}>
-                  <Text>
+                  <Text selectable>
                     {item.contents}
                   </Text>
                 </View>

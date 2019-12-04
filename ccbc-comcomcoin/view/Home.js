@@ -321,7 +321,7 @@ export default class Home extends BaseComponent {
               })}>
               <Image
                 resizeMode="contain"
-                source={require('./../images/icons8-services-48.png')}
+                source={require('./../images/icons8-star-48.png')}
               />
               <Text>お気に入り</Text>
             </TouchableOpacity>
