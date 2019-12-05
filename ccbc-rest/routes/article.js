@@ -249,12 +249,18 @@ async function edit(req, res) {
     }
 
     // BCへの書き込み
+    // TODO : テスト環境が整っていないため、コメントアウト
     // const transactionId = await bcrequest(req)
     const transactionId = ""
 
-    // 贈与テーブルの追加
+    // 贈与テーブルの追加と、記事テーブルに贈与PKを更新
     if (isInsert) {
-      await insertZoyo(db, tx, req, transactionId)
+      // 贈与テーブルの追加
+      var ret = await insertZoyo(db, tx, req, transactionId)
+      const zoyoPk = ret[0].t_zoyo_pk
+
+      // 記事テーブルの更新
+      await updateKijiAfterZoyo(db, tx, req, kijiPk, zoyoPk)
     }
   })
     .then(result => {
@@ -460,8 +466,8 @@ function insertOrUpdateKiji(db, tx, req, isInsert) {
     var sql = ""
     if (isInsert) {
       sql =
-        "insert into t_kiji (t_kiji_category_pk, t_shain_pk, title, contents, post_dt, post_tm, t_coin_ido_pk, file_path, delete_flg, insert_user_id, insert_tm, update_user_id, update_tm) " +
-        " values (:t_kiji_category_pk, :t_shain_pk, :title, :contents, current_timestamp, current_timestamp, :t_coin_ido_pk, :file_path, '0', :user_id, current_timestamp, :user_id, current_timestamp) " +
+        "insert into t_kiji (t_kiji_category_pk, t_shain_pk, title, contents, post_dt, post_tm, file_path, delete_flg, insert_user_id, insert_tm, update_user_id, update_tm) " +
+        " values (:t_kiji_category_pk, :t_shain_pk, :title, :contents, current_timestamp, current_timestamp, :file_path, '0', :user_id, current_timestamp, :user_id, current_timestamp) " +
         " returning t_kiji_pk"
     } else {
       sql =
@@ -480,9 +486,36 @@ function insertOrUpdateKiji(db, tx, req, isInsert) {
         title: req.body.title,
         contents: req.body.contents,
         hashtag: req.body.hashtag,
-        t_coin_ido_pk: null,
         file_path: req.body.file_path,
         user_id: req.body.loginShainPk
+      }
+    })
+      .spread((datas, metadata) => {
+        return resolve(datas)
+      })
+  })
+}
+
+/**
+ * 記事情報（t_kiji）テーブルへの贈与PK更新
+ * @param db SequelizeされたDBインスタンス
+ * @param tx トランザクション
+ * @param req リクエスト
+ * @param t_kiji_pk 記事テーブルPK
+ * @param t_zoyo_pk 贈与テーブルPK
+ */
+function updateKijiAfterZoyo(db, tx, req, t_kiji_pk, t_zoyo_pk) {
+  return new Promise((resolve, reject) => {
+    var sql =
+      "update t_kiji set " +
+      " t_coin_ido_pk = :t_zoyo_pk" +
+      " where t_kiji_pk = :t_kiji_pk"
+
+    db.query(sql, {
+      transaction: tx,
+      replacements: {
+        t_kiji_pk: t_kiji_pk,
+        t_zoyo_pk: t_zoyo_pk
       }
     })
       .spread((datas, metadata) => {
@@ -502,13 +535,14 @@ function insertZoyo(db, tx, req, transactionId) {
   return new Promise((resolve, reject) => {
     var sql =
       "insert into t_zoyo (zoyo_moto_shain_pk, zoyo_saki_shain_pk, transaction_id, zoyo_comment, nenji_flg, delete_flg, insert_user_id, insert_tm) " +
-      " values (:zoyo_moto_shain_pk, :zoyo_saki_shain_pk, :transaction_id, :zoyo_comment, :nenji_flg, '0', :insert_user_id, current_timestamp) "
+      " values (:zoyo_moto_shain_pk, :zoyo_saki_shain_pk, :transaction_id, :zoyo_comment, :nenji_flg, '0', :insert_user_id, current_timestamp) " +
+      " returning t_zoyo_pk"
 
     db.query(sql, {
       transaction: tx,
       replacements: {
-        zoyo_moto_shain_pk: req.body.loginShainPk,
-        zoyo_saki_shain_pk: jimuShainPk,
+        zoyo_moto_shain_pk: jimuShainPk,
+        zoyo_saki_shain_pk: req.body.loginShainPk,
         transaction_id: transactionId,
         zoyo_comment: "記事投稿",
         nenji_flg: "1",
