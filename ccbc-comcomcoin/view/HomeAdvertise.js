@@ -68,7 +68,7 @@ export default class HomeAdvertise extends BaseComponent {
             </View>
             <View style={{ margin: 10 }}>
               {/* コメント */}
-              <Text style={{ fontSize: 16 }}>
+              <Text selectable style={{ fontSize: 16 }}>
                 {this.state.comment}
               </Text>
             </View>

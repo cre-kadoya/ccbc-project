@@ -206,7 +206,7 @@ export default class Home extends BaseComponent {
                         source={require('./../images/good-on.png')}
                         style={{ width: 25, height: 25 }}
                       /> */}
-                      <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 12 }}>
+                      <Text style={{ color: 'red', fontSize: 12 }}>
                         {'♡ '}{item.good_cnt}
                       </Text>
                     </View>
@@ -275,7 +275,7 @@ export default class Home extends BaseComponent {
                         source={require('./../images/good-on.png')}
                         style={{ width: 25, height: 25 }}
                       /> */}
-                      <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 12 }}>
+                      <Text style={{ color: 'red', fontSize: 12 }}>
                         {'♡ '}{item.good_cnt}
                       </Text>
                     </View>
