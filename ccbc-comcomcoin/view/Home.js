@@ -69,7 +69,7 @@ export default class Home extends BaseComponent {
           renban: item.renban
         })}
       >
-        <Image style={{ height: 185, width: windowWidth }}
+        <Image style={{ height: 180, width: windowWidth }}
           resizeMode="contain"
           source={{ uri: restdomain + `/uploads/advertise/${item.file_path}` }}
         />
@@ -85,7 +85,7 @@ export default class Home extends BaseComponent {
         </View>
 
         {/* -- 広告 -- */}
-        <View style={{ flex: 1.0, flexDirection: 'row' }}>
+        <View style={{ flex: 0.95, flexDirection: 'row' }}>
           {this.state.adList.length > 0 && (
             <View style={styles.container}>
               <Carousel
@@ -107,7 +107,7 @@ export default class Home extends BaseComponent {
                 <Pagination
                   dotsLength={this.state.adList.length}
                   activeDotIndex={this.state.activeSlide}
-                  containerStyle={{ paddingVertical: 10 }}
+                  containerStyle={{ paddingVertical: 5 }}
                   dotStyle={{
                     width: 10,
                     height: 10,
@@ -173,13 +173,13 @@ export default class Home extends BaseComponent {
                     mode: "home",
                     selectKijiPk: item.t_kiji_pk
                   })}>
-                  <Card containerStyle={{ height: 115, width: 150, marginTop: 2, marginBottom: 2 }}>
+                  <Card containerStyle={{ width: 150, marginTop: 2, marginBottom: 2, paddingBottom: 0 }}>
                     {/* 画像 */}
                     <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
                       {(item.file_path !== "" && item.file_path !== null) &&
                         <Image
                           source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
-                          style={{ width: 60, height: 60 }}
+                          style={{ width: 55, height: 55 }}
                           resizeMode='contain'
                         />
                       }
@@ -187,7 +187,7 @@ export default class Home extends BaseComponent {
                       {(item.file_path === "" || item.file_path === null) &&
                         <Image
                           source={require('./../images/icon-noimage.png')}
-                          style={{ width: 60, height: 60 }}
+                          style={{ width: 55, height: 55 }}
                         />
                       }
                     </View>
@@ -196,7 +196,7 @@ export default class Home extends BaseComponent {
                       {item.title}
                     </Text>
                     {/* ハッシュタグ */}
-                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ fontSize: 10, color: 'gray', marginTop: -10 }}>
+                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ fontSize: 8, color: 'gray', marginTop: -10 }}>
                       {item.hashtag_str}
                     </Text>
                     {/* いいね */}
@@ -206,7 +206,7 @@ export default class Home extends BaseComponent {
                         source={require('./../images/good-on.png')}
                         style={{ width: 25, height: 25 }}
                       /> */}
-                      <Text style={{ color: 'red', fontSize: 12 }}>
+                      <Text style={{ color: 'red', fontSize: 10 }}>
                         {'♡ '}{item.good_cnt}
                       </Text>
                     </View>
@@ -242,13 +242,13 @@ export default class Home extends BaseComponent {
                     mode: "home",
                     selectKijiPk: item.t_kiji_pk
                   })}>
-                  <Card containerStyle={{ height: 115, width: 150, marginTop: 2, marginBottom: 2 }}>
+                  <Card containerStyle={{ width: 150, marginTop: 2, marginBottom: 2, paddingBottom: 0 }}>
                     {/* 画像 */}
                     <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: -15 }}>
                       {(item.file_path !== "" && item.file_path !== null) &&
                         <Image
                           source={{ uri: restdomain + `/uploads/article/${item.file_path}` }}
-                          style={{ width: 60, height: 60 }}
+                          style={{ width: 55, height: 55 }}
                           resizeMode='contain'
                         />
                       }
@@ -256,7 +256,7 @@ export default class Home extends BaseComponent {
                       {(item.file_path === "" || item.file_path === null) &&
                         <Image
                           source={require('./../images/icon-noimage.png')}
-                          style={{ width: 60, height: 60 }}
+                          style={{ width: 55, height: 55 }}
                         />
                       }
                     </View>
@@ -265,7 +265,7 @@ export default class Home extends BaseComponent {
                       {item.title}
                     </Text>
                     {/* ハッシュタグ */}
-                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ fontSize: 10, color: 'gray', marginTop: -10 }}>
+                    <Text ellipsizeMode={"tail"} numberOfLines={1} style={{ fontSize: 8, color: 'gray', marginTop: -10 }}>
                       {item.hashtag_str}
                     </Text>
                     {/* いいね */}
@@ -275,7 +275,7 @@ export default class Home extends BaseComponent {
                         source={require('./../images/good-on.png')}
                         style={{ width: 25, height: 25 }}
                       /> */}
-                      <Text style={{ color: 'red', fontSize: 12 }}>
+                      <Text style={{ color: 'red', fontSize: 10 }}>
                         {'♡ '}{item.good_cnt}
                       </Text>
                     </View>
@@ -287,7 +287,7 @@ export default class Home extends BaseComponent {
         </View>
 
         {/* -- 各機能アイコン -- */}
-        <View style={[{ flex: 0.3, flexDirection: 'row' }]}>
+        <View style={[{ flex: 0.35, flexDirection: 'row' }]}>
           <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <Image
               resizeMode="contain"

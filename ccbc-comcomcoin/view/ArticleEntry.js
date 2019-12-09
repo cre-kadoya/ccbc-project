@@ -232,8 +232,8 @@ export default class ArticleEntry extends BaseComponent {
   onClickPickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [1, 1]
+      allowsEditing: true
+      // aspect: [1, 1]
     })
     let data = {}
     if (!result.cancelled) {

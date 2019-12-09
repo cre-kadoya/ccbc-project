@@ -97,6 +97,8 @@ export default class HomeArticleList extends BaseComponent {
                 )
               })}
             </Card>
+            {/* スクロールが最下部まで表示されないことの暫定対応... */}
+            <View style={{ marginBottom: 80 }} />
           </ScrollView>
         </View>
       </View>

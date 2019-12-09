@@ -432,7 +432,7 @@ export default class ArticleRefer extends BaseComponent {
 
                 {/* 記事内容 */}
                 <View style={{ marginTop: 10, marginBottom: 10 }}>
-                  <Text selectable>
+                  <Text selectable style={{ fontSize: 16, lineHeight: 16 * 1.5 }}>
                     {item.contents}
                   </Text>
                 </View>
@@ -450,7 +450,7 @@ export default class ArticleRefer extends BaseComponent {
             )
           })}
           {/* スクロールが最下部まで表示されないことの暫定対応... */}
-          <View style={{ marginBottom: 100 }} />
+          <View style={{ marginBottom: 120 }} />
         </ScrollView>
 
         {/* -- 検索ダイアログ -- */}

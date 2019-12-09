@@ -20,7 +20,7 @@ export default class HomeInfoList extends BaseComponent {
   componentWillMount = async () => {
     // ログイン情報の取得（BaseComponent）
     await this.getLoginInfo()
-    
+
     // ホームAPI.ComComCoinホームお知らせ一覧取得処理の呼び出し
     await fetch(restdomain + '/comcomcoin_home/findHomeInfoList', {
       method: 'POST',
@@ -70,6 +70,8 @@ export default class HomeInfoList extends BaseComponent {
                 )
               })}
             </Card>
+            {/* スクロールが最下部まで表示されないことの暫定対応... */}
+            <View style={{ marginBottom: 80 }} />
           </ScrollView>
         </View>
       </View >
