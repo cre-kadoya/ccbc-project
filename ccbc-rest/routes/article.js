@@ -39,7 +39,6 @@ router.post('/findCategory', (req, res) => {
  */
 router.post('/findArticle', (req, res) => {
   console.log('API : findArticle - start')
-  console.log("req.body:", req.body)
   findArticleList(req, res)
   console.log('API : findArticle - end')
 })
@@ -48,11 +47,22 @@ router.post('/findArticle', (req, res) => {
  * API : edit
  * 記事情報を登録（新規登録も編集も）
  */
-router.post('/edit', upload.fields([{ name: 'imageData' }]), (req, res) => {
+router.post('/edit', (req, res) => {
   console.log('API : edit - start')
-  // console.log('API : edit - req.body : ' + JSON.stringify(req.body))
   edit(req, res)
   console.log('API : edit - end')
+})
+
+/**
+ * API : upload
+ * 記事情報のファイルをアップロード
+ */
+router.post('/upload', upload.fields([{ name: 'image' }]), (req, res) => {
+  console.log('API : upload - start')
+  res.json({
+    status: true
+  })
+  console.log('API : upload - end')
 })
 
 /**

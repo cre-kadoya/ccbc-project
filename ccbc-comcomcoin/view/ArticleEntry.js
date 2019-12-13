@@ -141,48 +141,89 @@ export default class ArticleEntry extends BaseComponent {
   entry = async () => {
     this.setState({ confirmDialogVisible: false })
 
-    // APIパラメータ作成
-    let data = new FormData()
-    data.append('db_name', this.state.db_name)
-    data.append('loginShainPk', this.state.loginShainPk)
-
-    // 画像ファイル
-    let fileName = ""
     if (this.state.imageData.uri !== "") {
-      fileName = moment(new Date()).format('YYYYMMDDHHmmssSS') + ".png"
-      data.append('imageData', {
-        uri: (Constants.platform.android ? 'file://' : '') + this.state.imageData.uri,
+      // 画像ファイルのアップロードがある場合
+      const fileName = moment(new Date()).format('YYYYMMDDHHmmssSS') + ".png"
+      let data = new FormData()
+      data.append('image', {
+        uri: (Constants.platform.android ? this.state.imageData.uri : this.state.imageData.uri.replace("file://", "")),
+        // uri: this.state.imageData.uri,
         type: this.state.imageData.type,
         name: fileName
       })
-    } else if (this.state.file_path !== "") {
-      fileName = this.state.file_path
+
+      // var http = new XMLHttpRequest()
+      // http.open("POST", restdomain + '/article/upload')
+      // http.setRequestHeader("Content-type", "multipart/form-data")
+      // http.onreadystatechange = async (e) => {
+      //   if (request.readyState !== 4) {
+      //     return
+      //   }
+      //   if (http.status === 200) {
+      //     // 記事API.投稿処理の呼び出し（DB登録→BC登録）
+      //     this.edit(fileName)
+      //   } else {
+      //     alert("画像ファイルのアップロードに失敗しました status:" + http.status)
+      //   }
+      // }
+      // http.send(data)
+
+      await fetch(restdomain + '/article/upload', {
+        method: 'POST',
+        body: data,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'multipart/form-data',
+        }
+      })
+        .then(function (response) {
+          return response.json()
+        })
+        .then(function (json) {
+          if (json.status) {
+            // 記事API.投稿処理の呼び出し（DB登録→BC登録）
+            this.edit(fileName)
+          } else {
+            alert("画像ファイルのアップロードに失敗しました")
+          }
+        }.bind(this))
+        .catch(error => alert(error))
+
+      // axios
+      //   .post(restdomain + '/article/upload',
+      //     data,
+      //     { headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'multipart/form-data' }) }
+      //   )
+      //   .then((res) => {
+      //     if (res.data.status) {
+      //       // 記事API.投稿処理の呼び出し（DB登録→BC登録）
+      //       this.edit(fileName)
+      //     } else {
+      //       alert("画像ファイルのアップロードに失敗しました")
+      //     }
+      //   })
+      //   .catch((error) => alert(error))
+    } else {
+      // 記事API.投稿処理の呼び出し（DB登録→BC登録）
+      this.edit(this.state.file_path)
     }
-    data.append('t_kiji_pk', this.state.t_kiji_pk)
-    data.append('t_kiji_category_pk', this.state.t_kiji_category_pk)
-    data.append('t_shain_pk', this.state.t_shain_pk)
-    data.append('title', this.state.title)
-    data.append('contents', this.state.contents)
-    data.append('post_dt', new Date())
-    data.append('post_tm', new Date())
-    data.append('file_path', fileName)
-    data.append('hashtag_str', this.state.hashtag_str)
+  }
 
-    // alert(JSON.stringify(data))
+  edit = async (fileName) => {
+    this.state.file_path = fileName
 
-    // TODO : fetchがAndroidだとエラーとなる。axiosを使用してみているが、APIは正常に終了し、戻ってきた際にエラーとなる模様
-
-    // 記事API.投稿処理の呼び出し（DB登録→BC登録）
-    await axios
-      .post(restdomain + '/article/edit',
-        data,
-        { headers: { 'Accept': 'application/json', 'Content-Type': 'multipart/form-data' } }
-      )
-      .then((res) => {
-        // this.setState({ contents: JSON.stringify(res) })
-        if (!res.data.status) {
-          // TODO：エラー処理
-          alert("APIエラー")
+    await fetch(restdomain + '/article/edit', {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(this.state),
+      headers: new Headers({ 'Content-type': 'application/json' })
+    })
+      .then(function (response) {
+        return response.json()
+      })
+      .then(function (json) {
+        if (!json.status) {
+          alert("投稿処理でエラーが発生しました")
         } else {
           // 記事照会画面に戻る
           this.props.navigation.navigate('ArticleRefer', {
@@ -190,42 +231,8 @@ export default class ArticleEntry extends BaseComponent {
             selectCategory: this.state.selectCategory
           })
         }
-      })
-    // .catch((error) => {
-    //   alert(error)
-    //   // console.error(error)
-    // })
-
-    // await fetch(restdomain + '/article/edit', {
-    //   method: 'POST',
-    //   mode: 'cors',
-    //   body: data,
-    //   headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'multipart/form-data' })
-    //   // headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' })
-    // })
-    //   .then(
-    //     function (response) {
-    //       if (response.ok) {
-    //         return response.json()
-    //       }
-    //       throw new Error('Network response was not ok.');
-    //     }
-    //   )
-    //   .then(
-    //     function (json) {
-    //       if (!json.status) {
-    //         // TODO：エラー処理
-    //         alert("APIエラー")
-    //       } else {
-    //         // 記事照会画面に戻る
-    //         this.props.navigation.navigate('ArticleRefer', {
-    //           mode: this.state.mode,
-    //           selectCategory: this.state.selectCategory
-    //         })
-    //       }
-    //     }.bind(this)
-    //   )
-    //   .catch(error => console.error(error))
+      }.bind(this))
+      .catch((error) => alert(error))
   }
 
   /** 画像選択処理 */
